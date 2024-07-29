@@ -1,5 +1,5 @@
 import React from 'react';
-import FriendList from '../components/menubar/FriendList';
+import SidePanel from '../components/menubar/SidePanel';
 import Navbar from '../components/Navbar';
 import { Outlet } from 'react-router-dom';
 
@@ -9,8 +9,8 @@ function HomePage() {
       <Navbar />
       <div className="w-full sm:w-8/12 h-full mx-auto flex flex-col justify-between items-center shadow-2xl ">
         <div className="w-full flex flex-1 overflow-hidden">
-          <FriendList />
-          <div className="flex-grow flex-1 overflow-y-auto bg-red-300 ">
+          <SidePanel />
+          <div className="flex-grow flex-1 overflow-y-auto bg-slate-400 dark:bg-slate-900 transition-colors ">
             <Outlet />
           </div>
         </div>

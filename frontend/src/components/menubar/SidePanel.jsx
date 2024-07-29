@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Topbar from '../menubar/Topbar';
 import FriendList from './FriendList';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import HamMenu from './HamMenu';
+import { closeHam } from '../redux/slice/hamSlice';
 
 function SidePanel() {
   const isOpenHam = useSelector((state) => state.hamburger.isOpen);
-  console.log('SidePanel:', isOpenHam);
+  const dispatch = useDispatch();
+  const panelRef = useRef(null);
+
+  const handleClickOutside = (e) => {
+    if(panelRef.current && !panelRef.current.contains(e.target)){
+      dispatch(closeHam());
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown',handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown',handleClickOutside);
+    }
+  },[])
+
+
   return (
-    <div className="w-full sm:w-4/12 h-full bg-gray-100 dark:bg-slate-700 transition-colors relative overflow-hidden">
+    <div ref={panelRef} className="w-0 sm:w-4/12 h-full bg-gray-100 dark:bg-slate-700 transition-colors relative overflow-hidden">
       <Topbar />
       <div className="relative h-full">
         {/* HamMenu sliding in from the left */}

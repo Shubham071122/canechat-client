@@ -14,13 +14,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        
         <Route path="/" element={<HomePage />}>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="friend-request" element={<FriendRequest />} />
-          <Route path="userchat" element={<UserChat />} />
+          <Route path="chat/:userId" element={<UserChat />} />
 
           <Route path="*" element={<NoPage />} />
         </Route>

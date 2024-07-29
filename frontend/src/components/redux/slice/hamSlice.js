@@ -11,8 +11,11 @@ const hamSlice = createSlice({
         toggleHam: (state) => {
             state.isOpen = !state.isOpen;
         },
+        closeHam: (state) => {
+            state.isOpen = false;
+        }
     },
 });
 
-export const { toggleHam } = hamSlice.actions;
+export const { toggleHam, closeHam } = hamSlice.actions;
 export default hamSlice.reducer;

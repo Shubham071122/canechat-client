@@ -54,7 +54,7 @@ function Register() {
   return (
     <section className="relative w-full h-screen min-h-screen gap-10">
       <Navbar />
-      <div className="w-full h-full flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600 transition-colors">
+      <div className="w-full h-screen flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600 transition-colors">
         <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white sm:mt-72  dark:bg-slate-800 transition-colors">
           <div className="w-full flex flex-col items-center">
             <img src={Logo} alt="logo" className="w-16 h-16" />

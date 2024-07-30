@@ -24,11 +24,11 @@ function Login() {
   return (
     <section className="relative w-full h-screen min-h-screen">
       <Navbar />
-      <section className="w-full px-4 sm:px-0 flex items-center justify-center text-black h-full bg-blue-300 dark:bg-slate-600 transition-colors">
-        <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white dark:bg-slate-800 transition-colors">
+      <section className="w-full px-4 sm:px-0 flex items-center justify-center text-black h-full bg-blue-300 dark:bg-slate-600">
+        <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white dark:bg-slate-800">
           <div className="w-full flex flex-col items-center">
             <img src={Logo} alt="logo" className="w-20 h-20" />
-            <h2 className="text-gray-600 dark:text-gray-50 font-semibold text-2xl mt-3 transition-colors">
+            <h2 className="text-gray-600 dark:text-gray-50 font-semibold text-2xl mt-3">
               Welcome Back Buddy!
             </h2>
           </div>
@@ -38,7 +38,7 @@ function Login() {
               placeholder="Email or username"
               value={userData}
               onChange={hadleUserdataChange}
-              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl transition-colors"
+              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
             />
             <div className="mt-4 relative">
               <input
@@ -46,7 +46,7 @@ function Login() {
                 placeholder="Password"
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl transition-colors"
+                className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
               />
               <button
                 type="button"

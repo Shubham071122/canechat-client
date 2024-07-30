@@ -2,15 +2,27 @@ import React from 'react';
 import SidePanel from '../components/menubar/SidePanel';
 import Navbar from '../components/Navbar';
 import { Outlet } from 'react-router-dom';
+import lightBg from '../assets/chBg.jpg';
+import darkBg from '../assets/chBgD.jpg';
+
 
 function HomePage() {
   return (
-    <section className="w-full h-[100vh] flex flex-col bg-blue-300 dark:bg-gray-950 transition-colors overflow-y-hidden">
+    <section className="w-full h-[100vh] flex flex-col bg-blue-300 dark:bg-gray-950 overflow-y-hidden">
       <Navbar />
       <div className="w-full sm:w-8/12 h-full mx-auto flex flex-col justify-between items-center shadow-2xl ">
         <div className="w-full flex flex-1 overflow-hidden">
           <SidePanel />
-          <div className="flex-grow flex-1 overflow-y-auto bg-slate-400 dark:bg-slate-900 transition-colors ">
+          <div
+            className="flex-grow flex-1 overflow-y-auto bg-cover bg-center bg-lightBg dark:bg-darkBg"
+            // style={{
+            //   backgroundImage: `url(${lightBg})`,
+            // }}
+            // dark:bg-cover dark:bg-center
+            // dark:style={{
+            //   backgroundImage: `url(${darkBg})`,
+            // }}
+          >
             <Outlet />
           </div>
         </div>

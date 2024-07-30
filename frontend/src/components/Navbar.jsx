@@ -24,7 +24,7 @@ function Navbar() {
   };
 
   return (
-    <div className={`top-0 w-full py-2 sm:py-4 bg-white dark:bg-gray-800 transition-colors sticky z-10 ${
+    <div className={`top-0 w-full py-2 sm:py-4 bg-white dark:bg-gray-800 sticky z-10 ${
       darkMode ? 'nav-shad-dark' : 'nav-shad-light'
     }`}>
       <div className="w-11/12 sm:10/12 flex flex-row justify-between items-center mx-auto">

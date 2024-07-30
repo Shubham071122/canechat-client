@@ -10,6 +10,14 @@ export default {
       transitionDuration: {
         '1200': '1200ms', 
       },
+      backgroundImage: (theme) => ({
+        'lightBg':"url('/src/assets/chBg.jpg')",
+        'darkBg':"url('/src/assets/chBgD.jpg')",
+      }),
+    },
+  },variants: {
+    extend: {
+      backgroundImage: ['dark'],
     },
   },
   plugins: [],

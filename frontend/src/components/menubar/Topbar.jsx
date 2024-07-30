@@ -10,7 +10,7 @@ function Topbar() {
 
   return (
     <div className="w-full">
-      <div className="w-full flex flex-row items-center justify-between gap-5 px-4 py-4 bg-gray-200 dark:bg-slate-800 transition-colors">
+      <div className="w-full flex flex-row items-center justify-between gap-5 px-4 py-4 bg-gray-200 dark:bg-slate-800">
       <button
       className='transition-all 300s ease-in-out'
       onClick={() => {
@@ -19,9 +19,9 @@ function Topbar() {
         
       }>
           {isOpenHam ? (
-            <RxCross2 className="text-3xl font-bold text-black dark:text-gray-300 transition-colors " />
+            <RxCross2 className="text-3xl font-bold text-black dark:text-gray-300 " />
           ) : (
-            <RxHamburgerMenu className="text-3xl font-bold text-black dark:text-gray-300 transition-colors" />
+            <RxHamburgerMenu className="text-3xl font-bold text-black dark:text-gray-300" />
           )}
         </button>
         <div className="w-full">
@@ -29,7 +29,7 @@ function Topbar() {
             type="search"
             name="search"
             placeholder="Search"
-            className="w-full px-4 py-2 rounded-full outline-none bg-white dark:bg-gray-300 text-black dark:text-gray-700 transition-colors"
+            className="w-full px-4 py-2 rounded-full outline-none bg-white dark:bg-gray-300 text-black dark:text-gray-700"
           />
         </div>
       </div>

@@ -54,8 +54,8 @@ function Register() {
   return (
     <section className="relative w-full h-screen min-h-screen gap-10">
       <Navbar />
-      <div className="w-full h-screen flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600 transition-colors">
-        <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white sm:mt-72  dark:bg-slate-800 transition-colors">
+      <div className="w-full h-screen flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600">
+        <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white sm:mt-72  dark:bg-slate-800">
           <div className="w-full flex flex-col items-center">
             <img src={Logo} alt="logo" className="w-16 h-16" />
             <h2 className="text-gray-600 dark:text-gray-50 font-semibold text-2xl mt-3">
@@ -70,7 +70,7 @@ function Register() {
               onChange={handleChange}
               placeholder="Enter fullname"
               required
-              className="w-full px-4 py-4 rounded-xl outline-blue-900  text-xl text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 transition-colors"
+              className="w-full px-4 py-4 rounded-xl outline-blue-900  text-xl text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600"
             />
             {errors.fullName && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.fullName}</span>}
             <input
@@ -79,7 +79,7 @@ function Register() {
               placeholder="Enter email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 transition-colors text-xl mt-4"
+              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
             />
             {errors.email && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.email}</span>}
             <input
@@ -88,7 +88,7 @@ function Register() {
               placeholder="Enter username"
               value={formData.userName}
               onChange={handleChange}
-              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 transition-colors text-xl mt-4"
+              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
             />
             {errors.userName && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.userName}</span>}
             <div className="relative">
@@ -98,7 +98,7 @@ function Register() {
                 name='password'
                 value={useState.password}
                 onChange={handleChange}
-                className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 transition-colors text-xl mt-4"
+                className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
               />
               {errors.password && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.password}</span>}
               <button

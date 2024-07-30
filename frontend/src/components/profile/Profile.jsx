@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import img1 from '../../assets/avatarplaceholder.png';
+// import img1 from '../../assets/avatarplaceholder.png';
+import img1 from '../../assets/shubham.png';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { FaExclamationCircle } from 'react-icons/fa';
 import { FaRegEye, FaRegEyeSlash, FaSpinner } from 'react-icons/fa';
@@ -25,8 +26,8 @@ function Profile() {
   const handleNameChange = (e) => setName(e.target.value);
 
   return (
-    <section className="w-full h-screen overflow-y-auto bg-gray-300 dark:bg-gray-900">
-      <div className="flex flex-col m-3 sm:m-8 bg-gray-100 dark:bg-gray-800 p-10 rounded-lg shadow-lg relative">
+    <section className="w-full h-screen overflow-y-auto">
+      <div className="flex flex-col m-3 sm:m-8 bg-gray-100 dark:bg-gray-800 p-5 py-10 sm:p-10 rounded-lg shadow-lg relative">
         <div className="border rounded-full overflow-hidden w-32 h-32 mb-4 mx-auto">
           <img
             src={img1}
@@ -113,14 +114,14 @@ function Profile() {
         </div>
         {showDeletePopup && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 ">
-            <div className="bg-gray-100 dark:bg-gray-500 p-5 sm:p-8 rounded-lg shadow-lg mx-10 sm:mx-0">
+            <div className="bg-gray-100 dark:bg-gray-700 p-5 sm:p-8 rounded-lg shadow-lg mx-10 sm:mx-0">
               <div className="w-full flex items-center justify-center">
                 <FaExclamationCircle className="w-12 sm:w-16 h-12 sm:h-16 text-red-700 text-center mb-4" />
               </div>
-              <h2 className="text-xl font-bold mb-4 text-center">
+              <h2 className="text-xl font-bold mb-4 text-center text-black dark:text-gray-100">
                 Confirm Delete Account
               </h2>
-              <p className="mb-4">
+              <p className="mb-4 text-black dark:text-gray-100">
                 Please enter your email to confirm account deletion:
               </p>
               <form onSubmit={handleDeleteAccount}>

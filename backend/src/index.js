@@ -22,8 +22,11 @@ const io = new socketIo(server, {
 configureSocket(io);
 
 connectDB()
-.then(() => 
-        console.log(`✅ server is running at port : ${process.env.PORT}`))
+.then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`✅ server is running at port : ${process.env.PORT} `)
+    })
+})
 .catch((error) => {
     console.log("Mongodb Connection Failed !!!",error);
 })

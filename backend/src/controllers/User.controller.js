@@ -30,21 +30,19 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 //****  REGISTER USER  **** */
 const registerUser = asyncHandler(async (req, res) => {
-    const { fullName, email, userName, password } = req.body;
+    const { fullName, email, password } = req.body;
 
     if (
-        [fullName, email, userName, password].some(
+        [fullName, email, password].some(
             (field) => field?.trim() === ""
         )
     ) {
         throw new ApiError(400, "All fields are required");
     }
 
-    const existedUser = await User.findOne({
-        $or: [{ userName }, { email }],
-    });
+    const existedUser = await User.findOne({ email });
     if (existedUser) {
-        throw new ApiError(400, "User with email or username already exist");
+        throw new ApiError(400, "User with email or already exist");
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
@@ -57,12 +55,24 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar not uploaded on cloudinary!");
     }
 
+    // Create a unique username
+    const baseUsername = `@${fullName.split(' ')[0].toLowerCase()}`;
+    let userName = baseUsername;
+    let userNameExists = await User.findOne({ userName });
+
+    let counter = 1;
+    while (userNameExists) {
+        userName = `${baseUsername}_${counter}`;
+        userNameExists = await User.findOne({ userName });
+        counter++;
+    }
+
     const user = await User.create({
         fullName,
         email,
         avatar: avatar.url,
         password,
-        userName: userName.toLowerCase(),
+        userName,
     });
 
     const createdUser = await User.findById(user._id).select(

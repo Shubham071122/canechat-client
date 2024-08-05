@@ -1,31 +1,50 @@
 import mongoose from "mongoose";
-import {Message}  from "../models/Message.model.js";
+import { Message } from "../models/Message.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { User } from "../models/User.model.js";
 
 //**** CREATE MESSAGE ***** */
 const createMessage = asyncHandler(async (req, res) => {
     const { sender, recipient, message } = req.body;
+    const userId = req.user._id;
+
+    console.log(sender, recipient, message);
 
     if (!sender || !recipient || !message) {
         throw new ApiError(400, "All fields are required");
     }
 
+    // Fetching sender and recipient IDs
+    const senderUser = await User.findOne({ userName: sender });
+    const recipientUser = await User.findOne({ userName: recipient });
+
+    if (!senderUser || !recipientUser) {
+        throw new ApiError(404, "Sender or recipient not found");
+    }
+
+    // Checking if the sender is the logged-in user
+    if (senderUser._id.toString() !== userId.toString()) {
+        throw new ApiError(401, "Unauthorized request");
+    }
+
     try {
         const newMessage = await Message.create({
-            sender,
-            recipient,
+            sender: senderUser._id,
+            recipient: recipientUser._id,
             message,
         });
         await newMessage.save();
-    
+
         return res
             .status(200)
-            .json(new ApiResponse(200, newMessage, "Message sent successfully"))
+            .json(
+                new ApiResponse(200, newMessage, "Message sent successfully")
+            );
     } catch (error) {
-        console.log("Error while creating message:",error);
-        throw new ApiError(500,"Internal server error");
+        console.log("Error while creating message:", error);
+        throw new ApiError(500, "Internal server error");
     }
 });
 
@@ -90,5 +109,74 @@ const editMessage = asyncHandler(async (req, res) => {
     }
 });
 
+//***** FETCH SENDER MESSAGE (i sended) ***** */
+const fetchSentMessages = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
-export {createMessage,editMessage,deleteMessage};
+    try {
+        const sentMessages = await Message.find({ sender: userId })
+            .populate({
+                path: "recipient",
+                select: "userName",
+            })
+            .select("message recipient");
+
+        const formattedMessages = sentMessages.map((msg) => ({
+            message: msg.message,
+            recipientUserName: msg.recipient.userName,
+        }));
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    formattedMessages,
+                    "Fetched sent messages successfully"
+                )
+            );
+    } catch (error) {
+        console.error("Error while fetching sent messages:", error);
+        throw new ApiError(500, "Internal server error");
+    }
+});
+
+//***** FETCH RECIPIENT MESSAGE (i recived) ***** */
+const fetchReceivedMessages = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    try {
+        const receivedMessages = await Message.find({ recipient: userId })
+            .populate({
+                path: "sender",
+                select: "userName",
+            })
+            .select("message sender");
+
+        const formattedMessages = receivedMessages.map((msg) => ({
+            message: msg.message,
+            senderUserName: msg.sender.userName,
+        }));
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    formattedMessages,
+                    "Fetched received messages successfully"
+                )
+            );
+    } catch (error) {
+        console.error("Error while fetching received messages:", error);
+        throw new ApiError(500, "Internal server error");
+    }
+});
+
+export {
+    createMessage,
+    editMessage,
+    deleteMessage,
+    fetchSentMessages,
+    fetchReceivedMessages,
+};

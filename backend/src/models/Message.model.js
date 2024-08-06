@@ -5,10 +5,13 @@ const messageSchema = new Schema(
         sender: {
             type: Schema.Types.ObjectId,
             ref: "User",
+            required: true,
+
         },
         recipient : {
             type: Schema.Types.ObjectId,
             ref: "User",
+            required: true,
         },
         message: {
             type: String,
@@ -23,5 +26,9 @@ const messageSchema = new Schema(
         timestamps: true,
     }
 );
+
+messageSchema.index({ sender: 1 });
+messageSchema.index({ recipient: 1 });
+messageSchema.index({ sender: 1, recipient: 1 });
 
 export const Message = mongoose.model("Message", messageSchema);

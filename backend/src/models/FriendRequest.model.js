@@ -1,20 +1,29 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const friendRequestSchema = Schema(
+const friendRequestSchema = new Schema(
     {
-        fromuser:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'User',
+        fromUser: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
         },
-        toUser:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'User',
+        toUser: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
         },
-        status: { type: String, 
+        status: { 
+            type: String, 
             enum: ['pending', 'accepted', 'rejected'], 
             default: 'pending' 
         },
+    },
+    {
+        timestamps: true, 
     }
 );
 
-export const FriendRequest = mongoose.model("FriendRequest",friendRequestSchema);
+// Ensuring the combination of fromUser and toUser is unique
+friendRequestSchema.index({ fromUser: 1, toUser: 1 }, { unique: true });
+
+export const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);

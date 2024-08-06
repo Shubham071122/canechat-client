@@ -51,6 +51,7 @@ const createMessage = asyncHandler(async (req, res) => {
 //**** DELETE MESSAGE ***** */
 const deleteMessage = asyncHandler(async (req, res) => {
     const { messageId } = req.body;
+    const userId = req.user._id;
 
     if (!messageId) {
         throw new ApiError(400, "Message id is required!");
@@ -61,6 +62,11 @@ const deleteMessage = asyncHandler(async (req, res) => {
 
         if (!message) {
             throw new ApiError(400, "Message not found");
+        }
+
+        if (message.sender.toString() !== userId.toString() &&
+            message.recipient.toString() !== userId.toString()) {
+            throw new ApiError(403, "Unauthorized to delete this message");
         }
 
         const delMessage = await Message.deleteOne({ _id: message._id });
@@ -77,11 +83,12 @@ const deleteMessage = asyncHandler(async (req, res) => {
 //**** EDIT MESSAGE ***** */
 const editMessage = asyncHandler(async (req, res) => {
     const { messageId, message } = req.body;
+    const userId = req.user._id;
 
-    if (!messageId || !newMessageContent) {
+    if (!messageId || !message) {
         throw new ApiError(
             400,
-            "Message ID and new message content are required!"
+            "Message ID and message content are required!"
         );
     }
 
@@ -92,16 +99,25 @@ const editMessage = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Message not found");
         }
 
-        const upMessage = await Comment.findByIdAndUpdate(messageId, {
-            $set: {
-                message: message,
+        if (!existingMessage.sender.equals(userId)) {
+            throw new ApiError(403, "Unauthorized to edit this message");
+        }
+
+        const updatedMessage = await Message.findByIdAndUpdate(
+            messageId,
+            {
+                $set: {
+                    message: message,
+                    edited: true, 
+                },
             },
-        });
+            { new: true } 
+        );
 
         return res
             .status(200)
             .json(
-                new ApiResponse(200, upMessage, "Message updated successfully")
+                new ApiResponse(200, updatedMessage, "Message updated successfully")
             );
     } catch (error) {
         console.log("Error while editing message:", error);
@@ -112,18 +128,33 @@ const editMessage = asyncHandler(async (req, res) => {
 //***** FETCH SENDER MESSAGE (i sended) ***** */
 const fetchSentMessages = asyncHandler(async (req, res) => {
     const userId = req.user._id;
+    const {recipient} = req.body;
+
+    if(!recipient){
+        throw new ApiError(400,"Recipient id is required");
+    }
+
+    // Fetching sender and recipient IDs
+    const recipientUser = await User.findOne({ userName: recipient });
+
+    if (!recipientUser) {
+        throw new ApiError(404, "Recipient not found");
+    }
 
     try {
-        const sentMessages = await Message.find({ sender: userId })
+        const sentMessages = await Message.find({ sender: userId, recipient: recipientUser._id  })
             .populate({
                 path: "recipient",
                 select: "userName",
             })
-            .select("message recipient");
+            .select("_id message recipient createdAt updatedAt");
 
         const formattedMessages = sentMessages.map((msg) => ({
+            mesageId: msg._id,
             message: msg.message,
             recipientUserName: msg.recipient.userName,
+            createdAt: msg.createdAt,
+            updatedAt: msg.updatedAt,
         }));
 
         return res
@@ -144,18 +175,33 @@ const fetchSentMessages = asyncHandler(async (req, res) => {
 //***** FETCH RECIPIENT MESSAGE (i recived) ***** */
 const fetchReceivedMessages = asyncHandler(async (req, res) => {
     const userId = req.user._id;
+    const { sender } = req.body;
+
+    if(!sender){
+        throw new ApiError(400,"Sender id is required");
+    }
+
+    // Fetching sender ID
+    const senderUser = await User.findOne({ userName: sender });
+
+    if (!senderUser) {
+        throw new ApiError(404, "Sender not found");
+    }
 
     try {
-        const receivedMessages = await Message.find({ recipient: userId })
+        const receivedMessages = await Message.find({ sender: senderUser._id, recipient: userId })
             .populate({
                 path: "sender",
                 select: "userName",
             })
-            .select("message sender");
+            .select("_id message sender createdAt updatedAt");
 
         const formattedMessages = receivedMessages.map((msg) => ({
+            mesageId: msg._id,
             message: msg.message,
             senderUserName: msg.sender.userName,
+            createdAt: msg.createdAt,
+            updatedAt: msg.updatedAt,
         }));
 
         return res

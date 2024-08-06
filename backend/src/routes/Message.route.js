@@ -6,7 +6,7 @@ const router = Router();
 router.use(verifyJWT);
 
 router.route('/c/message').post(createMessage);
-router.route('/d/messages').delete(deleteMessage);
+router.route('/d/message').delete(deleteMessage);
 router.route('/e/message').patch(editMessage);
 router.route('/f/sent').get(fetchSentMessages);
 router.route('/f/recieved').get(fetchReceivedMessages);

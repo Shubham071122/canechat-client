@@ -5,8 +5,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import { FriendRequest } from "../models/FriendRequest.model.js";
-import { Friend } from "../models/Friend.model.js";
 
 //****** GENERATE ACCESS AND REFRESH TOKEN: *******/
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -459,126 +457,6 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 });
 
-//****** SENDING FRIEND REQUEST ******* */
-const sendFriendRequest = async (req, res) => {
-    const { fromUser, toUser } = req.body;
-
-    if (!fromUser || !toUser) {
-        throw new ApiError(400, "User Id is required");
-    }
-    try {
-        const friendRequest = await FriendRequest.create({ fromUser, toUser });
-        await friendRequest.save();
-
-        if (!friendRequest) {
-            throw new ApiError(400, "Erro while creating collection");
-        }
-
-        return res(200).json(
-            new ApiResponse(200, friendRequest, "Friend request sent")
-        );
-    } catch (error) {
-        console.log("Error creating friend request:", error);
-        throw new ApiError(500, "Internal server error");
-    }
-};
-
-//****** ACCEPT FRIEND REQUEST ******* */
-const acceptFriendRequest = asyncHandler(async(req,res) => {
-    const {requesdId} = req.body;
-
-    if(!requesdId){
-        throw new ApiError(400,"Request id is required");
-    }
-
-    try {
-        const request = await FriendRequest.findById(requesdId);
-        if(!request){
-            throw new ApiError(404,"Friend request not found");
-        }
-
-        if(request.status !== 'pending'){
-            throw new ApiError(400,"Friend request has already been processed");
-        }
-
-        //Update status to "accepted" in both directions
-        request.status = 'accepted';
-        await request.save();
-
-        //Create friend relationship
-        await Friend.create(
-            {
-                userId: request.fromUser,
-                friendId: request.touser,
-            }
-        );
-        await Friend.create(
-            {
-                userId: request.toUser,
-                friendId: request.fromUser,
-            }
-        );
-        return res.status(200).json(
-            new ApiResponse(200,"Frined request accepted")
-        )
-
-    } catch (error) {
-        console.log("Error accepting friend request:",error);
-        throw new ApiError(500,"Internal server error");
-    }
-});
-
-//****** REJECT FRIEND REQUEST ******* */
-const rejectFriendRequest = asyncHandler(async(req,res) => {
-    const {requestId} = req.body;
-
-    if(!requestId){
-        throw new ApiError(400,"Request Id is required");
-    }
-
-    try {
-        const request = await FriendRequest.findById(requestId);
-        if(!request){
-            throw new ApiError(404,"Friend Request not found");
-        }
-        if(request.status !== 'pending'){
-            throw new ApiError(400,"Friend request has already been processed");
-        }
-
-        //Update status to 'rejected'
-        request.status = 'rejected';
-        await request.save();
-
-        return res.status(200).json(
-            new ApiResponse(200,"Friend request rejected")
-        )
-
-    } catch (error) {
-        console.log("Error rejecting request:",error);
-        throw new ApiError(500,"Internal server error");
-    }
-
-});
-
-//****** GET FRIEND ******* */
-const getFriends = asyncHandler(async(req,res) => {
-    const {userId} = req.params;
-
-    if(!userId) {
-        throw new ApiError(400,"User Id is required");
-    }
-    try {
-        const friends = await Friend.find({userId}).populate('friendId');
-    
-        return res.status(200).json(
-            new ApiResponse(200,friends,"Friend fetcht successfully")
-        )
-    } catch (error) {
-        console.log("Error fetching allfriend:",error);
-        throw new ApiError(500,"Internal server error");
-    }
-})
-
 
 
 export {
@@ -593,9 +471,5 @@ export {
     updateAccountDetails,
     deleteAccount,
     forgetPassword,
-    resetPassword,
-    sendFriendRequest,
-    acceptFriendRequest,
-    rejectFriendRequest,
-    getFriends,
+    resetPassword
 };

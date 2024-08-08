@@ -23,9 +23,11 @@ app.use(cookieParser())
 //router
 import userRouter from "./routes/User.route.js";
 import messageRouter from "./routes/Message.route.js";
+import friendRouter from "./routes/Friend.route.js";
 
 app.use("/api/v1/users",userRouter);
 app.use("/api/v1/messages",messageRouter);
+app.use("/api/v1/friend",friendRouter);
 
 
 export{app};

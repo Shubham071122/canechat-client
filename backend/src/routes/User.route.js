@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {upload} from '../middlewares/multer.middelware.js'
 import { verifyJWT } from '../middlewares/auth.middelware.js';
-import { acceptFriendRequest, changeCurrentPassword, deleteAccount, forgetPassword, getCurrentUser, getFriends, getUserById, loginUser, logoutUser, refreshAccessToken, registerUser, rejectFriendRequest, resetPassword, sendFriendRequest, updateAccountDetails, updateUserAvatar } from '../controllers/User.controller.js';
+import { changeCurrentPassword, deleteAccount, forgetPassword, getCurrentUser, getUserById, loginUser, logoutUser, refreshAccessToken, registerUser, resetPassword, updateAccountDetails, updateUserAvatar } from '../controllers/User.controller.js';
 
 const router = Router();
 
@@ -23,9 +23,6 @@ router.route("/update-account").patch(verifyJWT,updateAccountDetails)
 router.route("/current-user").get(verifyJWT,getCurrentUser);
 router.route("/u/:userId").get(verifyJWT,getUserById);
 router.route("/delete-account").post(verifyJWT,deleteAccount)
-router.route("/get-friends").get(verifyJWT,getFriends);
-router.route("/send-request").post(verifyJWT,sendFriendRequest);
-router.route("/accept-request").post(verifyJWT,acceptFriendRequest);
-router.route("/reject-request").post(verifyJWT,rejectFriendRequest);
+
 
 export default router;

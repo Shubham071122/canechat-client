@@ -4,13 +4,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/User.model.js";
+import { BlockedUser } from "../models/BlockUser.model.js";
+import { Friend } from "../models/Friend.model.js";
 
 //**** CREATE MESSAGE ***** */
 const createMessage = asyncHandler(async (req, res) => {
     const { sender, recipient, message } = req.body;
     const userId = req.user._id;
-
-    console.log(sender, recipient, message);
 
     if (!sender || !recipient || !message) {
         throw new ApiError(400, "All fields are required");
@@ -27,6 +27,31 @@ const createMessage = asyncHandler(async (req, res) => {
     // Checking if the sender is the logged-in user
     if (senderUser._id.toString() !== userId.toString()) {
         throw new ApiError(401, "Unauthorized request");
+    }
+
+    // Checking if the recipient has blocked the sender
+    const isBlocked = await BlockedUser.findOne({
+        blocker: recipientUser._id,
+        blocked: senderUser._id,
+    });
+
+    if (isBlocked) {
+        throw new ApiError(
+            403,
+            "You are blocked by this user and cannot send messages."
+        );
+    }
+
+    // Checking if the sender and recipient are still friends
+    const isFriend = await Friend.findOne({
+        $or: [
+            { currentUser: senderUser._id, friend: recipientUser._id },
+            { currentUser: recipientUser._id, friend: senderUser._id },
+        ],
+    });
+
+    if (!isFriend) {
+        throw new ApiError(403, "You can only send messages to your friends.");
     }
 
     try {
@@ -64,8 +89,10 @@ const deleteMessage = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Message not found");
         }
 
-        if (message.sender.toString() !== userId.toString() &&
-            message.recipient.toString() !== userId.toString()) {
+        if (
+            message.sender.toString() !== userId.toString() &&
+            message.recipient.toString() !== userId.toString()
+        ) {
             throw new ApiError(403, "Unauthorized to delete this message");
         }
 
@@ -86,38 +113,51 @@ const editMessage = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!messageId || !message) {
-        throw new ApiError(
-            400,
-            "Message ID and message content are required!"
-        );
+        throw new ApiError(400, "Message ID and message content are required!");
+    }
+
+    const existingMessage = await Message.findById(messageId);
+
+    if (!existingMessage) {
+        throw new ApiError(400, "Message not found");
+    }
+
+    if (!existingMessage.sender.equals(userId)) {
+        throw new ApiError(403, "Unauthorized to edit this message");
+    }
+
+    // Checking if the sender and recipient are still friends
+    const isFriend = await Friend.findOne({
+        $or: [
+            { currentUser: userId, friend: existingMessage.recipient },
+            { currentUser: existingMessage.recipient, friend: userId },
+        ],
+    });
+
+    if (!isFriend) {
+        throw new ApiError(403, "You can only edit messages to your friends.");
     }
 
     try {
-        const existingMessage = await Message.findById(messageId);
-
-        if (!existingMessage) {
-            throw new ApiError(400, "Message not found");
-        }
-
-        if (!existingMessage.sender.equals(userId)) {
-            throw new ApiError(403, "Unauthorized to edit this message");
-        }
-
         const updatedMessage = await Message.findByIdAndUpdate(
             messageId,
             {
                 $set: {
                     message: message,
-                    edited: true, 
+                    edited: true,
                 },
             },
-            { new: true } 
+            { new: true }
         );
 
         return res
             .status(200)
             .json(
-                new ApiResponse(200, updatedMessage, "Message updated successfully")
+                new ApiResponse(
+                    200,
+                    updatedMessage,
+                    "Message updated successfully"
+                )
             );
     } catch (error) {
         console.log("Error while editing message:", error);
@@ -128,10 +168,10 @@ const editMessage = asyncHandler(async (req, res) => {
 //***** FETCH SENDER MESSAGE (i sended) ***** */
 const fetchSentMessages = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const {recipient} = req.body;
+    const { recipient } = req.body;
 
-    if(!recipient){
-        throw new ApiError(400,"Recipient id is required");
+    if (!recipient) {
+        throw new ApiError(400, "Recipient id is required");
     }
 
     // Fetching sender and recipient IDs
@@ -142,7 +182,10 @@ const fetchSentMessages = asyncHandler(async (req, res) => {
     }
 
     try {
-        const sentMessages = await Message.find({ sender: userId, recipient: recipientUser._id  })
+        const sentMessages = await Message.find({
+            sender: userId,
+            recipient: recipientUser._id,
+        })
             .populate({
                 path: "recipient",
                 select: "userName",
@@ -177,8 +220,8 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { sender } = req.body;
 
-    if(!sender){
-        throw new ApiError(400,"Sender id is required");
+    if (!sender) {
+        throw new ApiError(400, "Sender id is required");
     }
 
     // Fetching sender ID
@@ -189,7 +232,10 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
     }
 
     try {
-        const receivedMessages = await Message.find({ sender: senderUser._id, recipient: userId })
+        const receivedMessages = await Message.find({
+            sender: senderUser._id,
+            recipient: userId,
+        })
             .populate({
                 path: "sender",
                 select: "userName",

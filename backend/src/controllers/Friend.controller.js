@@ -8,34 +8,51 @@ import { BlockedUser } from "../models/BlockUser.model.js";
 
 //****** SENDING FRIEND REQUEST ******* */
 const sendFriendRequest = asyncHandler(async (req, res) => {
-    const fromUser = req.user._id; //id
-    const { toFriend } = req.body; //userName
+    const fromUser = req.user._id; // ID of the user sending the request
+    const { toFriend } = req.body; // Username of the recipient
 
     if (!toFriend) {
-        throw new ApiError(400, "Recipient user ID (toUser) is required");
+        throw new ApiError(400, "Recipient username (toFriend) is required.");
     }
 
-    const toUser = await User.findOne({ userName: toFriend }); //geting id
+    const toUser = await User.findOne({ userName: toFriend }); // Getting recipient ID
 
     if (!toUser) {
-        throw new ApiError(404, "User not found");
+        throw new ApiError(404, "User not found.");
     }
 
     // Prevent sending a friend request to oneself
     if (fromUser.equals(toUser._id)) {
-        throw new ApiError(400, "You cannot send a friend request to yourself");
+        throw new ApiError(
+            400,
+            "You cannot send a friend request to yourself."
+        );
+    }
+
+    // Check if the users are already friends
+    const existingFriendship = await Friend.findOne({
+        $or: [
+            { currentUser: fromUser, friend: toUser._id },
+            { currentUser: toUser._id, friend: fromUser },
+        ],
+    });
+
+    if (existingFriendship) {
+        throw new ApiError(400, "You are already friends with this user.");
+    }
+
+    // Checking if a friend request has already been sent
+    const existingRequest = await FriendRequest.findOne({
+        fromUser,
+        toUser: toUser._id,
+    });
+
+    if (existingRequest) {
+        throw new ApiError(400, "Friend request already sent.");
     }
 
     try {
-        // Checking if the friend request already exists
-        const existingRequest = await FriendRequest.findOne({
-            fromUser,
-            toUser: toUser._id,
-        });
-        if (existingRequest) {
-            throw new ApiError(400, "Friend request already sent");
-        }
-
+        // Create a new friend request
         const friendRequest = await FriendRequest.create({
             fromUser,
             toUser: toUser._id,
@@ -50,12 +67,12 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
                 new ApiResponse(
                     200,
                     friendRequest,
-                    "Friend request sent successfully"
+                    "Friend request sent successfully."
                 )
             );
     } catch (error) {
         console.error("Error sending friend request:", error);
-        throw new ApiError(500,error, "Internal server error");
+        throw new ApiError(500, "Internal server error.");
     }
 });
 
@@ -90,7 +107,6 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
             );
         }
 
-
         //Updating request
         friendRequest.status = "accepted";
         await friendRequest.save();
@@ -107,7 +123,7 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
         ]);
 
         //TODO: MAKE SOME DLETEING FEATURE AFTER REQUESt ACCEPT.
-        // Delete friend request
+        // Delete entry from friend request collection
         // await FriendRequest.findByIdAndDelete(requestId);
 
         return res
@@ -121,7 +137,7 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
             );
     } catch (error) {
         console.error("Error while accepting friend request:", error);
-        throw new ApiError(500,error, "Internal server error.");
+        throw new ApiError(500, error, "Internal server error.");
     }
 });
 
@@ -161,8 +177,8 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
         await friendRequest.save();
 
         //TODO: MAKE SOME DLETEING FEATURE AFTER REQUEST REJECT.
-        // Delete friend request
-        // await FriendRequest.findByIdAndDelete(requestId);
+        // Delete entry from friend request collection
+        await FriendRequest.findByIdAndDelete(requestId);
 
         return res
             .status(200)
@@ -179,21 +195,32 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
     }
 });
 
-//****** GET FRIEND ******* */
-const getFriends = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+//****** GET FRIENDS ******* */
+const getALLFriends = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
-    if (!userId) {
-        throw new ApiError(400, "User Id is required");
-    }
     try {
-        const friends = await Friend.find({ userId }).populate("friendId");
+        const friends = await Friend.find({ currentUser: userId }).populate(
+            "friend"
+        );
+
+        const formattedFriends = friends.map((friendship) => ({
+            friendId: friendship.friend._id,
+            friendUserName: friendship.friend.userName,
+            friendFullName: friendship.friend.fullName,
+        }));
 
         return res
             .status(200)
-            .json(new ApiResponse(200, friends, "Friend fetcht successfully"));
+            .json(
+                new ApiResponse(
+                    200,
+                    formattedFriends,
+                    "Friends fetched successfully"
+                )
+            );
     } catch (error) {
-        console.log("Error fetching allfriend:", error);
+        console.log("Error fetching friends:", error);
         throw new ApiError(500, "Internal server error");
     }
 });
@@ -277,7 +304,7 @@ const unFriend = asyncHandler(async (req, res) => {
 
 //**** BLOCK USER  ***** */
 const blockUser = asyncHandler(async (req, res) => {
-    const { friendUserName } = req.body;//username
+    const { friendUserName } = req.body; //username
     const userId = req.user._id;
 
     if (!friendUserName) {
@@ -298,7 +325,7 @@ const blockUser = asyncHandler(async (req, res) => {
     // Checking if the user is already blocked
     const existingBlock = await BlockedUser.findOne({
         blocker: userId,
-        blocked: friendUser._id
+        blocked: friendUser._id,
     });
 
     if (existingBlock) {
@@ -321,20 +348,22 @@ const blockUser = asyncHandler(async (req, res) => {
         // Creating a new block entry
         const newBlock = await BlockedUser.create({
             blocker: userId,
-            blocked: friendUser._id
+            blocked: friendUser._id,
         });
-    
-        return res.status(200).json(new ApiResponse(200, newBlock, "User blocked successfully."));
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, newBlock, "User blocked successfully."));
     } catch (error) {
-        console.log("Error while blocking the user:",error);
-        throw new ApiError(500,"Internal server error");
+        console.log("Error while blocking the user:", error);
+        throw new ApiError(500, "Internal server error");
     }
 });
 
 //****** UNBLOCK USER ***** */
 const unblockUser = asyncHandler(async (req, res) => {
-    const { friendUserName } = req.body;//username
-    const userId = req.user._id; 
+    const { friendUserName } = req.body; //username
+    const userId = req.user._id;
 
     if (!friendUserName) {
         throw new ApiError(400, "Friend's username is required.");
@@ -354,7 +383,7 @@ const unblockUser = asyncHandler(async (req, res) => {
     // Checking if the user has already unblocked the friend
     const existingBlock = await BlockedUser.findOne({
         blocker: userId,
-        blocked: friendUser._id
+        blocked: friendUser._id,
     });
 
     if (!existingBlock) {
@@ -377,26 +406,25 @@ const unblockUser = asyncHandler(async (req, res) => {
         // Remove the block entry
         await BlockedUser.deleteOne({
             blocker: userId,
-            blocked: friendUser._id
+            blocked: friendUser._id,
         });
-    
-        return res.status(200).json(new ApiResponse(200, null, "User unblocked successfully."));
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, null, "User unblocked successfully."));
     } catch (error) {
-        console.log("Error while unblocking the user;",error);
-        throw new ApiError(500,"Internal server error");
+        console.log("Error while unblocking the user;", error);
+        throw new ApiError(500, "Internal server error");
     }
 });
-
-
 
 export {
     sendFriendRequest,
     acceptFriendRequest,
     rejectFriendRequest,
-    getFriends,
+    getALLFriends,
     getFriendRequests,
     unFriend,
     blockUser,
     unblockUser,
-
 };

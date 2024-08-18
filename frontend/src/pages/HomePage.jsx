@@ -14,15 +14,7 @@ function HomePage() {
         <div className="w-full flex flex-1 overflow-hidden">
           <SidePanel />
           <div
-            className="flex-grow flex-1 overflow-y-auto bg-cover bg-center bg-lightBg dark:bg-darkBg"
-            // style={{
-            //   backgroundImage: `url(${lightBg})`,
-            // }}
-            // dark:bg-cover dark:bg-center
-            // dark:style={{
-            //   backgroundImage: `url(${darkBg})`,
-            // }}
-          >
+            className="flex-grow flex-1 overflow-y-auto bg-cover bg-center bg-lightBg dark:bg-darkBg">
             <Outlet />
           </div>
         </div>

@@ -6,19 +6,94 @@ import { BsFillEyeSlashFill } from 'react-icons/bs';
 import { LiaSpinnerSolid } from 'react-icons/lia';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const [userData, setUserData] = useState('');
-  const [password, setPassword] = useState('');
+  const [loginData, setLoginData] = useState({
+    userData: '',
+    password: '',
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    userData: '',
+    password: '',
+  });
+  const { loginUser } = useAuth();
   const navigate = useNavigate();
 
-  const hadleUserdataChange = (e) => {
-    setUserData(e.target.value);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
   };
+
   const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
+    const { value } = e.target;
+    setLoginData({ ...loginData, password: value });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+  
+    const { userData, password } = loginData;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+    if (userData.includes('@')) {
+      if (!emailRegex.test(userData)) {
+        newErrors.userData = 'Please enter a valid email address!';
+      }
+    } else {
+      if (!userData.startsWith('@')) {
+        newErrors.userData = 'Username must start with @!';
+      }
+    }
+  
+    if (!password) {
+      newErrors.password = 'Password is required!';
+    }
+  
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!validateForm()) {
+      toast.error('Fill all required fields!');
+      setLoading(false);
+      return;
+    }
+
+    // Prepare the loginData object to send to the backend
+  const payload = {};
+
+  if (loginData.userData.includes('@')) {
+    payload.email = loginData.userData;
+  } else {
+    payload.userName = loginData.userData;
+  }
+
+  payload.password = loginData.password;
+
+    try {
+      const response = await loginUser(payload);
+      if(response.statusCode === 200){
+        console.log("res:",response);
+        setLoading(false);
+        toast.success('Login successful!');
+        navigate("/")
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log('Error while login:', error);
+      toast.error('Someting went wrong!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,24 +111,36 @@ function Login() {
             <input
               type="text"
               placeholder="Email or username"
-              value={userData}
-              onChange={hadleUserdataChange}
+              name="userData"
+              value={loginData.userData}
+              onChange={handleInputChange}
               className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
             />
+            {errors.userData && (
+              <p className="text-red-500 text-sm">{errors.userData}</p>
+            )}
             <div className="mt-4 relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
-                value={password}
+                name="password"
+                value={loginData.password}
                 onChange={handlePasswordChange}
                 className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm">{errors.password}</p>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-[17px] text-gray-400 text-lg"
               >
-                {showPassword ? <BsFillEyeSlashFill className='text-2xl' /> : <BsFillEyeFill className='text-2xl' />}
+                {showPassword ? (
+                  <BsFillEyeSlashFill className="text-2xl" />
+                ) : (
+                  <BsFillEyeFill className="text-2xl" />
+                )}
               </button>
             </div>
             <Link
@@ -63,7 +150,11 @@ function Login() {
               Forget Password?
             </Link>
           </div>
-          <button className="w-full flex flex-row justify-center items-center bg-blue-700 text-white font-medium text-2xl py-3 rounded-xl hover:transition-all 300ms ease-in-out hover:bg-blue-600">
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full flex flex-row justify-center items-center bg-blue-700 text-white font-medium text-2xl py-3 rounded-xl hover:transition-all 300ms ease-in-out hover:bg-blue-600"
+          >
             {loading ? (
               <LiaSpinnerSolid className="animate-spin text-3xl" />
             ) : (

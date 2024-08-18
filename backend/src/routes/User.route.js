@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {upload} from '../middlewares/multer.middelware.js'
 import { verifyJWT } from '../middlewares/auth.middelware.js';
 import { changeCurrentPassword, deleteAccount, forgetPassword, getCurrentUser, getUserById, loginUser, logoutUser, refreshAccessToken, registerUser, resetPassword, updateAccountDetails, updateUserAvatar } from '../controllers/User.controller.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
 
@@ -14,7 +15,16 @@ router.route("/register").post(upload.fields([
 router.route("/login").post(loginUser);
 router.route("/forgot-password").post(forgetPassword);
 router.route("/reset-password").post(resetPassword);
+router.get('/check-auth', verifyJWT, asyncHandler(async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
 
+    res.status(200).json({
+        success: true,
+        user: req.user,
+    });
+}));
 router.route("/logout").post(verifyJWT,logoutUser);
 router.route("/change-password").post(verifyJWT,changeCurrentPassword);
 router.route("/refresh-token").post(refreshAccessToken);

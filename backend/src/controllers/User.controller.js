@@ -30,11 +30,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, password } = req.body;
 
-    if (
-        [fullName, email, password].some(
-            (field) => field?.trim() === ""
-        )
-    ) {
+    if ([fullName, email, password].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -54,7 +50,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // Create a unique username
-    const baseUsername = `@${fullName.split(' ')[0].toLowerCase()}`;
+    const baseUsername = `@${fullName.split(" ")[0].toLowerCase()}`;
     let userName = baseUsername;
     let userNameExists = await User.findOne({ userName });
 

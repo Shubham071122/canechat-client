@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Logo from '../assets/ce-logo.png';
-import avatarPlaceholder from '../assets/avatarplaceholder.png'
+import avatarPlaceholder from '../assets/avatarplaceholder.png';
 import { FcGoogle } from 'react-icons/fc';
 import { BsFillEyeFill } from 'react-icons/bs';
 import { BsFillEyeSlashFill } from 'react-icons/bs';
@@ -8,12 +8,13 @@ import { LiaSpinnerSolid } from 'react-icons/lia';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
 
 function Register() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    userName: '',
+    // userName: '',
     password: '',
     avatar: '',
   });
@@ -21,6 +22,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { registerUser } = useAuth();
 
   const handleChange = (e) => {
     if (e.target.type === 'file') {
@@ -34,27 +36,49 @@ function Register() {
     const newErrors = {};
     if (!formData.fullName) newErrors.fullName = 'Full name is required!';
     if (!formData.email) newErrors.email = 'Email is required!';
-    if (!formData.userName) newErrors.userName = 'Username is required!';
+    // if (!formData.userName) newErrors.userName = 'Username is required!';
     if (!formData.password) newErrors.password = 'Password is required!';
     if (!formData.avatar) newErrors.avatar = 'Avatar is required!';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if(!validateForm()){
-      toast.error("Fill all required fields!")
+
+    if (!validateForm()) {
+      toast.error('Fill all required fields!');
       setLoading(false);
       return;
     }
-    console.log(formData);
-  }
+
+    // Creating FormData object to send data including the file
+    const data = new FormData();
+    data.append('fullName', formData.fullName);
+    data.append('email', formData.email);
+    data.append('password', formData.password);
+    data.append('avatar', formData.avatar);
+
+    try {
+      const response = await registerUser(data);
+      if(response.statusCode === 200){
+        setLoading(false);
+        toast.success('Register successfully');
+        navigate('/login');
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Registration failed:', error);
+      toast.error('Someting went wrong!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="relative w-full h-screen min-h-screen gap-10">
       <Navbar />
-      <div className="w-full h-screen flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600">
+      <div className="w-full h-full flex items-center justify-center text-black px-4 sm:px-0 bg-blue-300 dark:bg-slate-600">
         <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white sm:mt-72  dark:bg-slate-800">
           <div className="w-full flex flex-col items-center">
             <img src={Logo} alt="logo" className="w-16 h-16" />
@@ -72,44 +96,67 @@ function Register() {
               required
               className="w-full px-4 py-4 rounded-xl outline-blue-900  text-xl text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600"
             />
-            {errors.fullName && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.fullName}</span>}
+            {errors.fullName && (
+              <span className="text-red-500 italic text-xs font-sans ml-2">
+                {errors.fullName}
+              </span>
+            )}
             <input
               type="text"
-              name='email'
+              name="email"
               placeholder="Enter email"
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
             />
-            {errors.email && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.email}</span>}
-            <input
+            {errors.email && (
+              <span className="text-red-500 italic text-xs font-sans ml-2">
+                {errors.email}
+              </span>
+            )}
+            {/* <input
               type="text"
-              name='userName'
+              name="userName"
               placeholder="Enter username"
               value={formData.userName}
               onChange={handleChange}
               className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
             />
-            {errors.userName && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.userName}</span>}
+            {errors.userName && (
+              <span className="text-red-500 italic text-xs font-sans ml-2">
+                {errors.userName}
+              </span>
+            )} */}
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
-                name='password'
+                name="password"
                 value={useState.password}
                 onChange={handleChange}
                 className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl mt-4"
               />
-              {errors.password && <span  className="text-red-500 italic text-xs font-sans ml-2">{errors.password}</span>}
+              {errors.password && (
+                <span className="text-red-500 italic text-xs font-sans ml-2">
+                  {errors.password}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-8 text-gray-400 text-lg mb-5"
               >
-                {showPassword ? <BsFillEyeSlashFill className='text-2xl'/> : <BsFillEyeFill className='text-2xl' />}
+                {showPassword ? (
+                  <BsFillEyeSlashFill className="text-2xl" />
+                ) : (
+                  <BsFillEyeFill className="text-2xl" />
+                )}
               </button>
             </div>
-            <label className="text-gray-600 text-lg block mb-2 mt-5" htmlFor="avatar">
+            <label
+              className="text-gray-600 text-lg block mb-2 mt-5"
+              htmlFor="avatar"
+            >
               Avatar :
             </label>
             <div className="mb-5 w-full flex items-center justify-center flex-col">
@@ -133,14 +180,17 @@ function Register() {
                 />
               </div>
               {errors.avatar && (
-                <span className="text-red-500 italic text-xs font-sans ml-2">{errors.avatar}</span>
+                <span className="text-red-500 italic text-xs font-sans ml-2">
+                  {errors.avatar}
+                </span>
               )}
             </div>
-            <button 
-            type='submit'
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full flex flex-row justify-center items-center bg-blue-700 text-white font-medium text-2xl py-3 rounded-xl hover:transition-all 300ms ease-in-out hover:bg-blue-600 mt-10">
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full flex flex-row justify-center items-center bg-blue-700 text-white font-medium text-2xl py-3 rounded-xl hover:transition-all 300ms ease-in-out hover:bg-blue-600 mt-10"
+            >
               {loading ? (
                 <LiaSpinnerSolid className="animate-spin text-3xl" />
               ) : (

@@ -10,20 +10,21 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/users/check-auth`);
-        if (response.status === 200) {
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/users/check-auth`,{withCredentials: true});
+        if (response.status == 200) {
           setIsAuthenticated(true);
-          setUser(response.data.user);
+          setUserData(response.data.user);
         } else {
           setIsAuthenticated(false);
         }
       } catch (error) {
         setIsAuthenticated(false);
+        console.error('Auth failed:', error);
       }
     };
     checkAuthStatus();
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 
       if(response.data.statusCode == 200){
         setIsAuthenticated(true);
-        setUser(response.data.data.user);
+        setUserData(response.data.data.user);
       }
       return response.data;
     } catch (error) {
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
         const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/users/register`, data);
         if (response.data.statusCode === 200) {
             setIsAuthenticated(true);
-            setUser(response.data.data.user);
+            setUserData(response.data.data.user);
         }
         return response.data;
     } catch (error) {
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loginUser, registerUser,logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userData, loginUser, registerUser,logout }}>
       {children}
     </AuthContext.Provider>
   );

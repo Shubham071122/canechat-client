@@ -4,6 +4,8 @@ import img1 from '../../assets/shubham.png';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { FaExclamationCircle } from 'react-icons/fa';
 import { FaRegEye, FaRegEyeSlash, FaSpinner } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import { MdPhotoCamera } from 'react-icons/md';
 
 function Profile() {
   const [isEdit, setIsEdit] = useState(false);
@@ -12,10 +14,12 @@ function Profile() {
   const [deleteEmail, setDeleteEmail] = useState('');
   const [delError, setDelError] = useState(false);
   const [delLoading, setDelLoading] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const { userData } = useAuth();
 
-  const [name, setName] = useState('Shubham Kumar');
-  const [userName, setUserName] = useState('Shubham_07');
-  const [email, setEmail] = useState('shubham@gmail.com');
+  const [name, setName] = useState(userData?.fullName || '');
+  const [userName, setUserName] = useState(userData?.userName || '');
+  const [email, setEmail] = useState(userData?.email || '');
 
   const hadleEdit = () => setIsEdit(!isEdit);
   const handleUpdatePassword = () => setShowPasswordPopup(!showPasswordPopup);
@@ -27,13 +31,16 @@ function Profile() {
 
   return (
     <section className="w-full h-screen overflow-y-auto">
-      <div className="flex flex-col m-3 sm:m-8 bg-gray-100 dark:bg-gray-800 p-5 py-10 sm:p-10 rounded-lg shadow-lg relative">
-        <div className="border rounded-full overflow-hidden w-32 h-32 mb-4 mx-auto">
+      <div className="relative flex flex-col m-3 sm:m-8 bg-gray-100 dark:bg-gray-800 p-5 py-10 sm:p-10 rounded-lg shadow-lg">
+        <div className="relative border rounded-full overflow-hidden w-32 h-32 mb-4 mx-auto">
           <img
-            src={img1}
+            src={userData.avatar}
             alt="profile"
             className="w-full h-full object-cover"
           />
+        <button className="absolute bottom-2 right-2 transform translate-x-1/2 translate-y-1/2 p-1 bg-black bg-opacity-50 rounded-full">
+          <MdPhotoCamera className="text-2xl text-white" />
+        </button>
         </div>
         <div className=" my-6 flex flex-col gap-2 sm:gap-5 ">
           <div className="flex items-center  gap-3 text-gray-900 dark:text-gray-100 border-y py-5 ">
@@ -93,20 +100,20 @@ function Profile() {
 
         <div className="w-full bg-red-300 p-5 rounded-md mt-10">
           <div className="w-full">
-            <h3 className="text-xl font-semibold mb-2">Delete Account</h3>
-            <p>
+            <h3 className="text-lg font-semibold mb-2">Delete Account</h3>
+            <p className="text-sm">
               Would you like to delete account?<br></br>
               Deleting your account will permanently remove all the chat and
               data associated with it.
               <span className="italic">
-                Your Chat ,Friend and all Infromantion.
+                Your Chat , Friend and all Infromantion.
               </span>
               And you no more able to recover it!
             </p>
           </div>
           <button
             onClick={() => setShowDeletePopup(true)}
-            className="mt-5 px-4 py-3 bg-red-600 text-white rounded-md shadow-md flex items-center italic"
+            className="mt-5 px-4 py-2 bg-red-600 text-white rounded-md shadow-md flex items-center italic"
           >
             I want to delete
             <RiDeleteBin6Line className="text-lg ml-2" />

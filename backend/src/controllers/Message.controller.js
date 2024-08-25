@@ -265,10 +265,72 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
     }
 });
 
+//***** FRIEND WITH LAST MESSAGE ***** */
+const friendLastMessage = asyncHandler(async (req,res) => {
+    const userId = req.user.id;
+
+    try {
+        const friends = await Message.aggregate([
+            {
+                $match: {
+                    $or: [{ sender: userId }, { recipient: userId }],
+                },
+            },
+            {
+                $sort: { createdAt: -1 },
+            },
+            {
+                $group: {
+                    _id: {
+                        $cond: [
+                            { $eq: ["$sender", userId] },
+                            "$recipient",
+                            "$sender",
+                        ],
+                    },
+                    lastMessage: { $first: "$$ROOT" },
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "friend",
+                },
+            },
+            {
+                $unwind: "$friend",
+            },
+            {
+                $project: {
+                    "friend._id": 1,
+                    "friend.username": 1,
+                    "friend.avatar": 1,
+                    "lastMessage.message": 1,
+                    "lastMessage.createdAt": 1,
+                },
+            },
+            {
+                $sort: { 'lastMessage.createdAt': -1 } 
+              }
+        ]);
+        if(friends){
+            return res.status(200).json(
+                new ApiResponse(200,friends,"Friend list of last message fetched successfuly")
+            );
+        }
+    } catch (error) {
+        console.log("Error while fetching friends last message:",error);
+        throw new ApiError(500,"Error while fethching last message");
+    }
+});
+
 export {
     createMessage,
     editMessage,
     deleteMessage,
     fetchSentMessages,
     fetchReceivedMessages,
+    friendLastMessage
 };

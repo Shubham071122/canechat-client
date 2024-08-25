@@ -453,7 +453,34 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 });
 
+//****** SERACH USER ******* */
+const searchUser = asyncHandler(async (req, res) => {
+    const { query } = req.query;
 
+    if (!query) {
+        throw new ApiError(400, "Query is required!");
+    }
+
+    try {
+        const users = await User.find({
+            $or: [
+                { userName: { $regex: query, $options: "i" } },
+                { fullName: { $regex: query, $options: "i" } },
+            ]
+        }).select("-password -refreshToken -email -updatedAt").limit(10);
+
+        if(!users){
+            throw new ApiError(404,"User not found!");
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200,users,"User fetched successfully")
+        )
+    } catch (error) {
+        console.log("Error while fetching user:",error);
+        throw new ApiError(500,"Internal server error",error);
+    }
+});
 
 export {
     registerUser,
@@ -467,5 +494,6 @@ export {
     updateAccountDetails,
     deleteAccount,
     forgetPassword,
-    resetPassword
+    resetPassword,
+    searchUser,
 };

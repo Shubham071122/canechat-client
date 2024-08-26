@@ -20,7 +20,7 @@ function SearchSuggestions() {
               }`
             }
           >
-            <div className="px-4 py-4 w-full flex flex-row items-center justify-start gap-6 border rounded-md">
+            <div className="px-4 py-4 w-full flex flex-row items-center justify-start gap-6 border border-gray-400 rounded-md">
               <div className="border-[3px] rounded-full w-12 h-12 border-gray-400 dark:border-gray-200 flex items-center justify-center">
                 <img
                   src={user.avatar}

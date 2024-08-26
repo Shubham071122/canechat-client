@@ -266,14 +266,18 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
 });
 
 //***** FRIEND WITH LAST MESSAGE ***** */
-const friendLastMessage = asyncHandler(async (req,res) => {
+const friendLastMessage = asyncHandler(async (req, res) => {
     const userId = req.user.id;
+    console.log("id:", userId);
 
     try {
         const friends = await Message.aggregate([
             {
                 $match: {
-                    $or: [{ sender: userId }, { recipient: userId }],
+                    $or: [
+                        { sender: new mongoose.Types.ObjectId(userId) },
+                        { recipient: new mongoose.Types.ObjectId(userId) },
+                    ],
                 },
             },
             {
@@ -282,11 +286,16 @@ const friendLastMessage = asyncHandler(async (req,res) => {
             {
                 $group: {
                     _id: {
-                        $cond: [
-                            { $eq: ["$sender", userId] },
-                            "$recipient",
-                            "$sender",
-                        ],
+                        $cond: {
+                            if: {
+                                $eq: [
+                                    "$sender",
+                                    new mongoose.Types.ObjectId(userId),
+                                ],
+                            },
+                            then: "$recipient",
+                            else: "$sender",
+                        },
                     },
                     lastMessage: { $first: "$$ROOT" },
                 },
@@ -296,33 +305,42 @@ const friendLastMessage = asyncHandler(async (req,res) => {
                     from: "users",
                     localField: "_id",
                     foreignField: "_id",
-                    as: "friend",
+                    as: "friendDetails",
                 },
             },
             {
-                $unwind: "$friend",
+                $unwind: "$friendDetails",
             },
             {
                 $project: {
-                    "friend._id": 1,
-                    "friend.username": 1,
-                    "friend.avatar": 1,
-                    "lastMessage.message": 1,
-                    "lastMessage.createdAt": 1,
+                    _id: 0,
+                    friendId: "$_id",
+                    fullName: "$friendDetails.fullName",
+                    userName: "$friendDetails.userName",
+                    avatar: "$friendDetails.avatar",
+                    lastMessage: "$lastMessage.message",
+                    lastMessageTime: "$lastMessage.createdAt",
                 },
             },
             {
-                $sort: { 'lastMessage.createdAt': -1 } 
-              }
-        ]);
-        if(friends){
-            return res.status(200).json(
-                new ApiResponse(200,friends,"Friend list of last message fetched successfuly")
-            );
+                $sort: { lastMessageTime: -1 },
+            },
+        ]).exec();
+
+        if (friends) {
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(
+                        200,
+                        friends,
+                        "Friend list of last message fetched successfuly"
+                    )
+                );
         }
     } catch (error) {
-        console.log("Error while fetching friends last message:",error);
-        throw new ApiError(500,"Error while fethching last message");
+        console.log("Error while fetching friends last message:", error);
+        throw new ApiError(500, "Error while fethching last message");
     }
 });
 
@@ -332,5 +350,5 @@ export {
     deleteMessage,
     fetchSentMessages,
     fetchReceivedMessages,
-    friendLastMessage
+    friendLastMessage,
 };

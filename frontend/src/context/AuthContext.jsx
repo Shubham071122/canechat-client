@@ -63,9 +63,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_SERVER_URL}/users/logout`, {}, { withCredentials: true });
-      setIsAuthenticated(false);
-      setUser(null);
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/users/logout`, {}, { withCredentials: true });
+      if(response.status === 200){
+        setIsAuthenticated(false);
+        setUserData(null);
+      }
+      return response.status;
     } catch (error) {
       console.error('Logout failed:', error);
     }

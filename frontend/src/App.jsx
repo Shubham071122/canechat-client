@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NoPage from './pages/NoPage';
@@ -15,7 +15,11 @@ import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   const { isAuthenticated } = useAuth();
-  // const isAuthenticated = true;
+  // const navigate = useNavigate();
+
+  // if(!isAuthenticated){
+  //   navigate("/login");
+  // }
 
   return (
     <BrowserRouter>

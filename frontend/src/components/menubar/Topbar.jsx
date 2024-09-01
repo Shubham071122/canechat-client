@@ -9,7 +9,7 @@ function Topbar() {
   const dispatch = useDispatch();
   const isOpenHam = useSelector((state) => state.hamburger.isOpen);
   const {query,setQuery} = useSearch();
-  console.log("search:",query);
+  // console.log("search:",query);
 
   const handleSearchQuery = (e) => {
     setQuery(e.target.value);

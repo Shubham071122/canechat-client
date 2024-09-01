@@ -18,7 +18,6 @@ function FriendList() {
           { withCredentials: true },
         );
         if (response.status == 200) {
-          console.log('res:', response);
           setFriends(response.data.data);
         } else {
           setFriends([]);

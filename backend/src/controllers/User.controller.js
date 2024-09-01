@@ -118,8 +118,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: false,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production", // true in production
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
     return res
         .status(200)
@@ -140,28 +140,34 @@ const loginUser = asyncHandler(async (req, res) => {
 
 //****  LOGOUT USER  **** */
 const logoutUser = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                refreshToken: undefined,
-            },
-        },
-        {
-            new: true,
+    try {
+        if (!req.user || !req.user._id) {
+            return res
+                .status(400)
+                .json(new ApiResponse(400, {}, "User not authenticated"));
         }
-    );
 
-    const options = {
-        httpOnly: true,
-        secure: false,
-        sameSite: "None",
-    };
-    return res
-        .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User logged Out"));
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { $set: { refreshToken: null } },
+            { new: true }
+        );
+
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // true in production
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        };
+
+        return res
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .status(200)
+            .json(new ApiResponse(200, {}, "User logged out successfully"));
+    } catch (error) {
+        console.error("Logout error:", error);
+        return res.status(500).json(new ApiResponse(500, {}, "Server error"));
+    }
 });
 
 //****** CHANGING PASSWORD **** */
@@ -211,8 +217,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: false,
-            sameSite: "None",
+            secure: process.env.NODE_ENV === "production", // true in production
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         };
 
         const { accessToken, refreshToken } =
@@ -466,19 +472,21 @@ const searchUser = asyncHandler(async (req, res) => {
             $or: [
                 { userName: { $regex: query, $options: "i" } },
                 { fullName: { $regex: query, $options: "i" } },
-            ]
-        }).select("-password -refreshToken -email -updatedAt").limit(10);
+            ],
+        })
+            .select("-password -refreshToken -email -updatedAt")
+            .limit(10);
 
-        if(!users){
-            throw new ApiError(404,"User not found!");
+        if (!users) {
+            throw new ApiError(404, "User not found!");
         }
 
-        return res.status(200).json(
-            new ApiResponse(200,users,"User fetched successfully")
-        )
+        return res
+            .status(200)
+            .json(new ApiResponse(200, users, "User fetched successfully"));
     } catch (error) {
-        console.log("Error while fetching user:",error);
-        throw new ApiError(500,"Internal server error",error);
+        console.log("Error while fetching user:", error);
+        throw new ApiError(500, "Internal server error", error);
     }
 });
 

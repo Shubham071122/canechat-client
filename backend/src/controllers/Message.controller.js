@@ -268,7 +268,6 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
 //***** FRIEND WITH LAST MESSAGE ***** */
 const friendLastMessage = asyncHandler(async (req, res) => {
     const userId = req.user.id;
-    console.log("id:", userId);
 
     try {
         const friends = await Message.aggregate([

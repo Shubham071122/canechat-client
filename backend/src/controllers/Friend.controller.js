@@ -80,6 +80,8 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
 const acceptFriendRequest = asyncHandler(async (req, res) => {
     const { requestId } = req.body; //id
     const userId = req.user._id;
+    console.log("rid:",requestId);
+    console.log('uid:',userId);
 
     if (!requestId) {
         throw new ApiError(400, "Request ID is required.");
@@ -234,7 +236,7 @@ const getFriendRequests = asyncHandler(async (req, res) => {
         const friendRequests = await FriendRequest.find({
             toUser: userId,
             status: status || "pending",
-        }).populate("fromUser", "userName");
+        }).populate("fromUser", "userName fullName avatar");
 
         return res
             .status(200)

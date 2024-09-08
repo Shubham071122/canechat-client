@@ -11,7 +11,7 @@ function HomePage() {
     <section className="w-full h-[100vh] flex flex-col bg-blue-300 dark:bg-gray-950 overflow-y-hidden">
       <Navbar />
       <div className="w-full sm:w-8/12 h-full mx-auto flex flex-col justify-between items-center shadow-2xl ">
-        <div className="w-full flex flex-1 overflow-hidden">
+        <div className="w-full flex overflow-hidden">
           <SidePanel />
           <div
             className="flex-grow flex-1 overflow-y-auto bg-cover bg-center bg-lightBg dark:bg-darkBg">

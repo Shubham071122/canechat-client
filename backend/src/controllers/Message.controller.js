@@ -266,16 +266,100 @@ const fetchReceivedMessages = asyncHandler(async (req, res) => {
 });
 
 //***** FRIEND WITH LAST MESSAGE ***** */
-const friendLastMessage = asyncHandler(async (req, res) => {
+// const friendLastMessage = asyncHandler(async (req, res) => {
+//     const userId = req.user.id;
+
+//     try {
+//         const friends = await Message.aggregate([
+//             {
+//                 $match: {
+//                     $or: [
+//                         { sender: new mongoose.Types.ObjectId(userId) },
+//                         { recipient: new mongoose.Types.ObjectId(userId) },
+//                     ],
+//                 },
+//             },
+//             {
+//                 $sort: { createdAt: -1 },
+//             },
+//             {
+//                 $group: {
+//                     _id: {
+//                         $cond: {
+//                             if: {
+//                                 $eq: [
+//                                     "$sender",
+//                                     new mongoose.Types.ObjectId(userId),
+//                                 ],
+//                             },
+//                             then: "$recipient",
+//                             else: "$sender",
+//                         },
+//                     },
+//                     lastMessage: { $first: "$$ROOT" },
+//                 },
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "_id",
+//                     foreignField: "_id",
+//                     as: "friendDetails",
+//                 },
+//             },
+//             {
+//                 $unwind: "$friendDetails",
+//             },
+//             {
+//                 $project: {
+//                     _id: 0,
+//                     friendId: "$_id",
+//                     fullName: "$friendDetails.fullName",
+//                     userName: "$friendDetails.userName",
+//                     avatar: "$friendDetails.avatar",
+//                     lastMessage: "$lastMessage.message",
+//                     lastMessageTime: "$lastMessage.createdAt",
+//                 },
+//             },
+//             {
+//                 $sort: { lastMessageTime: -1 },
+//             },
+//         ]).exec();
+
+//         if (friends) {
+//             return res
+//                 .status(200)
+//                 .json(
+//                     new ApiResponse(
+//                         200,
+//                         friends,
+//                         "Friend list of last message fetched successfuly"
+//                     )
+//                 );
+//         }
+//     } catch (error) {
+//         console.log("Error while fetching friends last message:", error);
+//         throw new ApiError(500, "Error while fethching last message");
+//     }
+// });
+
+const getFriendsWithLastMessage = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const friends = await Message.aggregate([
+        // Fetch all friends
+        const friends = await Friend.find({ currentUser: userId }).populate("friend");
+            console.log("frds:",friends);
+            const friendIds = friends.map(friendship => friendship.friend._id);
+            console.log("frdiDs:",friendIds);
+
+        // Fetch last message for each friend
+        const lastMessages = await Message.aggregate([
             {
                 $match: {
                     $or: [
-                        { sender: new mongoose.Types.ObjectId(userId) },
-                        { recipient: new mongoose.Types.ObjectId(userId) },
+                        { sender: { $in: friendIds } },
+                        { recipient: { $in: friendIds } },
                     ],
                 },
             },
@@ -286,12 +370,7 @@ const friendLastMessage = asyncHandler(async (req, res) => {
                 $group: {
                     _id: {
                         $cond: {
-                            if: {
-                                $eq: [
-                                    "$sender",
-                                    new mongoose.Types.ObjectId(userId),
-                                ],
-                            },
+                            if: { $eq: ["$sender", new mongoose.Types.ObjectId(userId)] },
                             then: "$recipient",
                             else: "$sender",
                         },
@@ -326,22 +405,34 @@ const friendLastMessage = asyncHandler(async (req, res) => {
             },
         ]).exec();
 
-        if (friends) {
-            return res
-                .status(200)
-                .json(
-                    new ApiResponse(
-                        200,
-                        friends,
-                        "Friend list of last message fetched successfuly"
-                    )
-                );
-        }
+        // Format friends data with last messages
+        const formattedFriends = friends.map(friendship => {
+            const lastMessage = lastMessages.find(msg => msg.friendId.toString() === friendship.friend._id.toString());
+            return {
+                friendId: friendship.friend._id,
+                fullName: friendship.friend.fullName,
+                userName: friendship.friend.userName,
+                avatar: friendship.friend.avatar,
+                lastMessage: lastMessage ? lastMessage.lastMessage : 'New, Say Hii👋',
+                lastMessageTime: lastMessage ? lastMessage.lastMessageTime : null,
+            };
+        });
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    formattedFriends,
+                    "Friends with last message fetched successfully"
+                )
+            );
     } catch (error) {
-        console.log("Error while fetching friends last message:", error);
-        throw new ApiError(500, "Error while fethching last message");
+        console.log("Error fetching friends with last messages:", error);
+        throw new ApiError(500, "Internal server error");
     }
 });
+
 
 export {
     createMessage,
@@ -349,5 +440,6 @@ export {
     deleteMessage,
     fetchSentMessages,
     fetchReceivedMessages,
-    friendLastMessage,
+    // friendLastMessage,
+    getFriendsWithLastMessage
 };

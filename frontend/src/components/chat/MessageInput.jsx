@@ -50,7 +50,7 @@ function MessageInput() {
   }, []);
 
   return (
-    <div className="flex items-center p-2 px-3 bg-gray-100 dark:bg-slate-700 rounded-3xl">
+    <div className="flex items-center p-2 px-3 bg-gray-2  00 dark:bg-slate-700 rounded-3xl">
       {/* Emoji Picker */}
       <div className="relative" ref={emojiPickerRef}>
         <button

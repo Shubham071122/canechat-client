@@ -3,10 +3,12 @@ import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import getTimeStamp from '../time&date/getTimeStamp';
+import { useUser } from '../../context/UserContext';
 
 function FriendList() {
   const [friends, setFriends] = useState([]);
   const [lastMsgTime, setLastMsgTime] = useState('');
+  const {getUserDataById} = useUser();
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -18,7 +20,10 @@ function FriendList() {
           { withCredentials: true },
         );
         if (response.status == 200) {
-          setFriends(response.data.data);
+          const sortedFriends = response.data.data.sort((a, b) => {
+            return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+          });
+          setFriends(sortedFriends);
         } else {
           setFriends([]);
         }
@@ -30,6 +35,10 @@ function FriendList() {
     fetchFriends();
   }, []);
 
+  const handleClick = async (userId) =>{
+    getUserDataById(userId);
+  }
+
   return (
     <section className="w-full h-screen bg-gray-100 dark:bg-slate-700 overflow-y-auto">
       <div className="h-auto my-4 flex flex-col justify-center gap-2 px-2 rounded-md">
@@ -37,6 +46,7 @@ function FriendList() {
           <NavLink
             key={friend.friendId}
             to={`/chat/${friend.friendId}`}
+            onClick={() => handleClick(friend.friendId)}
             className={({ isActive }) =>
               `rounded-md ${
                 isActive ? 'shadow-md dark:shadow-gray-900' : 'shadow-sm'

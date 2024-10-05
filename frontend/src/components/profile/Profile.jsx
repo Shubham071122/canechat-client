@@ -1,33 +1,103 @@
 import React, { useState } from 'react';
-// import img1 from '../../assets/avatarplaceholder.png';
-import img1 from '../../assets/shubham.png';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { FaExclamationCircle } from 'react-icons/fa';
-import { FaRegEye, FaRegEyeSlash, FaSpinner } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { MdPhotoCamera } from 'react-icons/md';
+import { BsFillEyeFill } from 'react-icons/bs';
+import { BsFillEyeSlashFill } from 'react-icons/bs';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 function Profile() {
   const [isEdit, setIsEdit] = useState(false);
-  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [deleteEmail, setDeleteEmail] = useState('');
-  const [delError, setDelError] = useState(false);
   const [delLoading, setDelLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const { userData } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passLoading, setPassLoading] = useState(false);
 
-  const [name, setName] = useState(userData?.fullName || '');
-  const [userName, setUserName] = useState(userData?.userName || '');
-  const [email, setEmail] = useState(userData?.email || '');
+  // Track if name or password has been changed to enable buttons
+  const [nameChanged, setNameChanged] = useState(false);
+  const [canUpdatePassword, setCanUpdatePassword] = useState(false);
 
-  const hadleEdit = () => setIsEdit(!isEdit);
-  const handleUpdatePassword = () => setShowPasswordPopup(!showPasswordPopup);
+  const [fullName, setFullName] = useState(userData?.fullName || '');
+
+  // Toggle edit mode
+  const hadleEdit = async () => {
+    try {
+      const response = await axios.patch(`${import.meta.env.VITE_SERVER_URL}/users/update-account`,
+          { fullName },
+          { withCredentials: true },
+        );
+  
+        if (response.data.statusCode === 200) {
+          toast.success("Account detail updated!")
+          setNameChanged(false);
+        }
+    } catch (error) {
+      console.log("Error while updateing name:",error);
+      toast.error("Something went wrong!");
+    }
+  }
+
+  // Handle name change and detect if it has changed from the original value
+  const handleNameChange = (e) => {
+    setFullName(e.target.value);
+    setNameChanged(e.target.value !== userData.fullName);
+  };
+
+  // Handle password input change
+  const handleOldPasswordChange = (e) => {
+    setOldPassword(e.target.value);
+    setCanUpdatePassword(e.target.value && newPassword); 
+  };
+
+  const handleNewPasswordChange = (e) => {
+    setNewPassword(e.target.value);
+    setCanUpdatePassword(oldPassword && e.target.value); 
+  };
+
   const handleDeleteAccount = () => {
     console.log('Delete account');
   };
 
-  const handleNameChange = (e) => setName(e.target.value);
+  const handlePasswordChange = async () => {
+    setPassLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/users/change-password`,
+        { oldPassword, newPassword },
+        { withCredentials: true },
+      );
+
+      if (response.data.statusCode === 400) {
+        toast.error(response.data.message);
+        setOldPassword('');
+        setPassLoading(false);
+        setCanUpdatePassword(false);
+      } else {
+        toast.success('Password changed successfully!');
+        setOldPassword('');
+        setNewPassword('');
+        setPassLoading(false);
+        setCanUpdatePassword(false);
+      }
+    } catch (error) {
+      toast.error('Something went wrong!');
+      console.log(
+        'Error changing password:',
+        error.response?.data || error.message,
+      );
+    } finally {
+      setPassLoading(false);
+      setCanUpdatePassword(false);
+    }
+  };
 
   return (
     <section className="w-full h-screen overflow-y-auto">
@@ -38,62 +108,93 @@ function Profile() {
             alt="profile"
             className="w-full h-full object-cover"
           />
-        <button className="absolute bottom-2 right-2 transform translate-x-1/2 translate-y-1/2 p-1 bg-black bg-opacity-50 rounded-full">
-          <MdPhotoCamera className="text-2xl text-white" />
-        </button>
+          <button className="absolute bottom-2 right-2 transform translate-x-1/2 translate-y-1/2 p-1 bg-black bg-opacity-50 rounded-full">
+            <MdPhotoCamera className="text-2xl text-white" />
+          </button>
         </div>
         <div className=" my-6 flex flex-col gap-2 sm:gap-5 ">
           <div className="flex items-center  gap-3 text-gray-900 dark:text-gray-100 border-y py-5 ">
             <p>Name:</p>
             <p
-              className={`w-full text-gray-700 dark:text-gray-300 ${
-                isEdit ? 'p-0' : 'p-2'
-              } rounded-md`}
+              className={`w-full text-gray-700 dark:text-gray-300 p-2 rounded-md`}
             >
-              {isEdit ? (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={handleNameChange}
-                  className="rounded w-full bg-gray-200 dark:text-gray-300 outline-none p-2 dark:bg-slate-700 border"
-                />
-              ) : (
-                name
-              )}
+              <input
+                type="text"
+                value={fullName}
+                onChange={handleNameChange}
+                className="rounded w-full bg-gray-200 dark:text-gray-300 outline-none p-2 dark:bg-slate-700 border"
+              />
             </p>
           </div>
           <div className="flex gap-3 text-gray-900 dark:text-gray-100  border-b pb-5 ">
             <p>Username:</p>
-            <p className="text-gray-700 dark:text-gray-300">{userName}</p>
+            <p className="text-gray-700 dark:text-gray-300">
+              {userData?.userName}
+            </p>
           </div>
           <div className="flex gap-3 text-gray-900 dark:text-gray-100  border-b pb-5 ">
             <p>Email:</p>
-            <p className="text-gray-700 dark:text-gray-300">{email}</p>
+            <p className="text-gray-700 dark:text-gray-300">
+              {userData?.email}
+            </p>
           </div>
         </div>
+        {/* Save Button */}
         <div className="flex space-x-4 mb-4 justify-end">
           <button
             onClick={hadleEdit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+            disabled={!nameChanged}
+            className={`${
+              nameChanged
+                ? 'bg-blue-500 hover:bg-blue-600'
+                : 'bg-gray-300 cursor-not-allowed'
+            } text-white px-4 py-2 rounded-lg transition duration-300`}
           >
-            {isEdit ? 'Save' : 'Edit'}
+            Save
           </button>
         </div>
 
         <div className="my-4 w-full">
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
+            value={oldPassword}
+            onChange={handleOldPasswordChange}
             placeholder="Old Password"
             className="rounded w-full bg-gray-200 dark:text-gray-300 outline-none p-2 dark:bg-slate-700 border mb-3"
           />
-          <input
-            type="password"
-            placeholder="New Password"
-            className="rounded w-full bg-gray-200 dark:text-gray-300 outline-none p-2 dark:bg-slate-700 border"
-          />
+
+          <div className="relative">
+            <input
+              value={newPassword}
+              onChange={handleNewPasswordChange}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="New Password"
+              className="rounded w-full bg-gray-200 dark:text-gray-300 outline-none p-2 dark:bg-slate-700 border"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-400 text-base"
+            >
+              {showPassword ? (
+                <BsFillEyeSlashFill className="text-xl" />
+              ) : (
+                <BsFillEyeFill className="text-xl" />
+              )}
+            </button>
+          </div>
+          {/* Update Password Button */}
           <div className="flex space-x-4 mb-4 justify-end mt-5">
-            <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300">
-              Update Password
+            <button
+              onClick={handlePasswordChange}
+              disabled={!canUpdatePassword || passLoading}
+              className={`${
+                canUpdatePassword
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-gray-300 cursor-not-allowed'
+              } text-white px-4 py-2 rounded-lg transition duration-300`}
+            >
+              {passLoading ? 'Updating...' : 'Update Password'}
             </button>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { BsSendFill, BsEmojiLaughing } from 'react-icons/bs';
 import TextareaAutosize from 'react-textarea-autosize'; 
 import toast from 'react-hot-toast';
 
-function MessageInput() {
+function MessageInput({onSendMessage}) {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const isDarkMode = document.documentElement.classList.contains('dark');
@@ -30,6 +30,7 @@ function MessageInput() {
   const handleSendMessage = () => {
     if (message.trim()) {
       console.log('Message sent:', message);
+      onSendMessage(message);
       setMessage(''); 
     }
   };
@@ -50,7 +51,7 @@ function MessageInput() {
   }, []);
 
   return (
-    <div className="flex items-center p-2 px-3 bg-gray-2  00 dark:bg-slate-700 rounded-3xl">
+    <div className="flex items-center p-2 px-3 bg-gray-300 dark:bg-slate-700 rounded-3xl">
       {/* Emoji Picker */}
       <div className="relative" ref={emojiPickerRef}>
         <button

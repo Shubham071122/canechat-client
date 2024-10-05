@@ -52,7 +52,8 @@ function SidePanel() {
               : 'opacity-100 pointer-events-auto'
           }`}
         >
-          {searchResults?.length > 0 ? <SearchSuggestions /> : <FriendList />}
+          {/* {searchResults?.length > 0 ? <SearchSuggestions /> : <FriendList />} */}
+          <FriendList />
         </div>
       </div>
     </div>

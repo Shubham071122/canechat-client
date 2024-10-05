@@ -4,11 +4,14 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import getTimeStamp from '../time&date/getTimeStamp';
 import { useUser } from '../../context/UserContext';
+import { useSearch } from '../../context/SearchContext';
+import SearchSuggestions from './SearchSuggestions';
 
 function FriendList() {
   const [friends, setFriends] = useState([]);
   const [lastMsgTime, setLastMsgTime] = useState('');
-  const {getUserDataById} = useUser();
+  const { getUserDataById } = useUser();
+  const { searchResults } = useSearch();
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -35,8 +38,23 @@ function FriendList() {
     fetchFriends();
   }, []);
 
-  const handleClick = async (userId) =>{
-    getUserDataById(userId);
+  const handleClick = async (userId) => {
+    // if (userId ) {
+    //   await getUserDataById(userId);
+    // }
+    console.log("click")
+  };
+
+  // console.log('friends:', friends);
+
+  if (searchResults.length > 0) {
+    return (
+      <section className="w-full h-screen bg-gray-100 dark:bg-slate-700 overflow-y-auto">
+        <div className="h-auto my-4 flex flex-col justify-center gap-2 px-2 rounded-md overflow-y-auto">
+          <SearchSuggestions />
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -71,7 +89,7 @@ function FriendList() {
                     : friend.lastMessage}
                 </p>
               </div>
-              <div className='absolute text-xs text-gray-600 dark:text-gray-300 bottom-2 right-2'>
+              <div className="absolute text-xs text-gray-600 dark:text-gray-300 bottom-2 right-2">
                 {friend.lastMessageTime && getTimeStamp(friend.lastMessageTime)}
               </div>
             </div>

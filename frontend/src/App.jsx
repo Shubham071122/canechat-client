@@ -12,6 +12,8 @@ import FriendProfile from './components/profile/FriendProfile';
 import { useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import PrivateRoute from './components/PrivateRoute';
+import Loader from './components/Loader';
+import { useState,useEffect } from 'react';
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -20,6 +22,18 @@ function App() {
   // if(!isAuthenticated){
   //   navigate("/login");
   // }
+
+  const [loading, setLoading] = useState(true); // Loader state
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false); 
+    }, 2000); 
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <BrowserRouter>

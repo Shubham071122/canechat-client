@@ -11,6 +11,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }) => {
         if (response.status == 200) {
           setIsAuthenticated(true);
           setUserData(response.data.user);
+          setCurrentUserId(response.data.user._id);
         } else {
           setIsAuthenticated(false);
         }
@@ -39,6 +41,7 @@ export const AuthProvider = ({ children }) => {
       if(response.data.statusCode == 200){
         setIsAuthenticated(true);
         setUserData(response.data.data.user);
+        setCurrentUserId(response.data.data.user._id);
       }
       return response.data;
     } catch (error) {
@@ -76,7 +79,7 @@ export const AuthProvider = ({ children }) => {
 
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userData, loginUser, registerUser,logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userData,currentUserId, loginUser, registerUser,logout }}>
       {children}
     </AuthContext.Provider>
   );

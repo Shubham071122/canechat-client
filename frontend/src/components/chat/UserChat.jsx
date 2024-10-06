@@ -1,39 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import { IoCall } from 'react-icons/io5';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import img1 from '../../assets/ce-logo.png';
-import MessageInput from './MessageInput';
-import PopupMenu from './PopupMenu';
 import { useUser } from '../../context/UserContext';
-import Messages from './Messages';
 import { useParams } from 'react-router-dom';
-import { fetchMessages, sendMessage } from '../redux/slice/messageSlice';
+import {
+  addMessage,
+  fetchMessages,
+  sendMessage,
+} from '../redux/slice/messageSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../../context/AuthContext';
+import io from 'socket.io-client';
+import MessageInput from './MessageInput';
+import PopupMenu from './PopupMenu';
+import Messages from './Messages';
 
 function UserChat() {
+  const [socket, setSocket] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const recipientId = useParams().userId;
-  const {currentUserId} = useAuth();
+  const { currentUserId } = useAuth();
   const { getUserDataById, userData } = useUser();
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.messages.messages);
   const messageStatus = useSelector((state) => state.messages.status);
 
-  console.log("uddd:",userData);
-  console.log("messages:",messages);
+  // Connect to Socket.IO
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_SERVER_URL, {
+      withCredentials: true,
+    });
+    setSocket(newSocket);
+
+    // Clean up when component unmounts
+    return () => newSocket.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (recipientId && currentUserId) {
+    if (socket && recipientId && currentUserId) {
       getUserDataById(recipientId);
-      dispatch(fetchMessages({ userId: currentUserId, recipientId: recipientId })); 
+      dispatch(
+        fetchMessages({ userId: currentUserId, recipientId: recipientId }),
+      );
+      // Join the chat room or set up a user connection
+      socket.emit('join', currentUserId);
+
+      // Listen for real-time messages
+      socket.on('receiveMessage', (message) => {
+        dispatch(addMessage(message)); // Update the Redux store with the new message
+      });
+
+      return () => {
+        socket.off('receiveMessage');
+      };
     }
-  }, [currentUserId, recipientId, dispatch]);
+  }, [currentUserId, recipientId, dispatch, useParams]);
+
 
   const handleSendMessage = (newMessage) => {
-    console.log("newMsg:",newMessage);
     if (currentUserId && recipientId) {
-      console.log("IT is vlid:",currentUserId,recipientId);
       dispatch(
         sendMessage({
           userId: currentUserId,
@@ -42,6 +67,10 @@ function UserChat() {
         }),
       );
     }
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    // dispatch(deleteMessage({ messageId }));
   };
 
   if (!userData || !recipientId || !currentUserId) {
@@ -77,8 +106,12 @@ function UserChat() {
           {showPopup && <PopupMenu onClose={() => setShowPopup(false)} />}
         </div>
         {/* Message Box */}
-        <div className="flex-grow overflow-auto my-2">
-          <Messages messages={messages} currentUser={userData.userName} />
+        <div className="flex-grow overflow-y-auto my-2">
+          <Messages
+            messages={messages}
+            currentUser={userData.userName}
+            onDeleteMessage={handleDeleteMessage}
+          />
         </div>
         {/* Input box */}
         <div>

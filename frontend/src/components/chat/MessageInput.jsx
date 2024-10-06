@@ -51,7 +51,7 @@ function MessageInput({onSendMessage}) {
   }, []);
 
   return (
-    <div className="flex items-center p-2 px-3 bg-gray-300 dark:bg-slate-700 rounded-3xl">
+    <div className="flex items-center p-2 px-3 bg-violet-400 dark:bg-slate-700 rounded-3xl">
       {/* Emoji Picker */}
       <div className="relative" ref={emojiPickerRef}>
         <button

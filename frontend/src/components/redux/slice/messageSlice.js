@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import {io} from 'socket.io-client';
+
+//Initialize socket
+const socket = io(import.meta.env.VITE_SERVER_URL, {withCredentials:true});
 
 //Fetch messages between users:
 export const fetchMessages = createAsyncThunk(
   'messages/fetchMessages',
   async ({ userId, recipientId }) => {
-    console.log("userId:",userId);
-    console.log("recipientId:",recipientId);
     const response = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}/messages/all-message`,
       { userId, friendUserId: recipientId },
@@ -21,6 +23,9 @@ export const fetchMessages = createAsyncThunk(
 export const sendMessage = createAsyncThunk(
   'messages/sendMessage',
   async ({ userId, recipientId, message }) => {
+
+    socket.emit('sendMessage', {sender:userId, recipient:recipientId,message});
+
     const response = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}/messages/c/message`,
       {

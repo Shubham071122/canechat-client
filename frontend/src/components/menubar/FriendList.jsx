@@ -6,12 +6,17 @@ import getTimeStamp from '../time&date/getTimeStamp';
 import { useUser } from '../../context/UserContext';
 import { useSearch } from '../../context/SearchContext';
 import SearchSuggestions from './SearchSuggestions';
+import { fetchMessages } from '../redux/slice/messageSlice';
+import { useDispatch } from 'react-redux';
+import { useAuth } from '../../context/AuthContext';
 
 function FriendList() {
   const [friends, setFriends] = useState([]);
   const [lastMsgTime, setLastMsgTime] = useState('');
   const { getUserDataById } = useUser();
   const { searchResults } = useSearch();
+  const dispatch = useDispatch();
+  const {currentUserId} = useAuth();
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -38,10 +43,11 @@ function FriendList() {
     fetchFriends();
   }, []);
 
-  const handleClick = async (userId) => {
-    // if (userId ) {
-    //   await getUserDataById(userId);
-    // }
+  const handleClick = async (recipientId) => {
+    if (recipientId ) {
+      await getUserDataById(recipientId);
+      dispatch(fetchMessages({ userId: currentUserId, recipientId: recipientId }))
+    }
     console.log("click")
   };
 

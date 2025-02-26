@@ -1,20 +1,16 @@
 import React, { useContext } from 'react'
 import { Navigate } from "react-router-dom";
 import {useAuth} from '../context/AuthContext'
+import Loader from './Loader';
 
 const PrivateRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
-    // const isAuthenticated = true;
+    const { isAuthenticated } = useAuth();
   
-    if (loading) {
-      return (
-        <div className="w-full h-screen flex items-center justify-center text-white text-[40px]">
-          Loading...
-        </div>
-      );
+    if (isAuthenticated === null) {
+      return <Loader />;
     }
-  
+    
     return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
-export default PrivateRoute
+export default PrivateRoute;

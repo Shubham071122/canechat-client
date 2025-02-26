@@ -85,7 +85,7 @@ function Login() {
         console.log("res:",response);
         setLoading(false);
         toast.success('Login successful!');
-        navigate("/")
+        navigate("/user")
       }
     } catch (error) {
       setLoading(false);

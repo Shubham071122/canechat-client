@@ -9,7 +9,7 @@ function SearchSuggestions() {
     <>
       {searchResults.map((user) => (
         <NavLink
-          to=""
+          to={`/user/f/${231232}`}
           key={user._id}
           className={({ isActive }) =>
             `rounded-md ${

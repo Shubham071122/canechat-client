@@ -4,15 +4,15 @@ const Messages = ({ messages,currentUser }) => {
 
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    scrollToBottom();
-  },[messages]);
+  // useEffect(() => {
+  //   scrollToBottom();
+  // },[messages]);
 
-  const scrollToBottom = () => {
-    if(messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
+  // const scrollToBottom = () => {
+  //   if(messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  //   }
+  // }
 
   return (
     <div className="h-full p-4">
@@ -36,7 +36,7 @@ const Messages = ({ messages,currentUser }) => {
         </div>
       ))}
       {/* Ref to scroll into view */}
-      <div ref={messagesEndRef} />
+      {/* <div ref={messagesEndRef} /> */}
     </div>
   );
 };

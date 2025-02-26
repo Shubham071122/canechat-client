@@ -35,6 +35,18 @@ function MessageInput({onSendMessage}) {
     }
   };
 
+// Handle key press for Shift + Enter and Enter
+  const handleKeyDown = (e) => {
+    if(e.key === 'Enter'){
+      if(e.shiftKey){
+
+      }else{
+        e.preventDefault();
+        handleSendMessage();
+      }
+    }
+  }
+
   // Close the emoji picker if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -79,6 +91,7 @@ function MessageInput({onSendMessage}) {
         placeholder="Type a message..."
         value={message}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         minRows={1}
         maxRows={5} 
         style={{ resize: 'none' }} 
@@ -86,7 +99,7 @@ function MessageInput({onSendMessage}) {
 
       {/* Send Button */}
       <button
-        className="px-3 py-3 text-blue-500 dark:text-gray-50 hover:bg-blue-200 dark:hover:bg-blue-400 rounded-full transition-colors 200ms ease-in-out"
+        className="px-3 py-3 text-gray-50 dark:text-gray-50 hover:bg-blue-400 rounded-full transition-colors 200ms ease-in-out"
         onClick={handleSendMessage}
       >
         <BsSendFill className='text-2xl'/>

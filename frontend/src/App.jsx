@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NoPage from './pages/NoPage';
@@ -13,58 +13,55 @@ import { useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import PrivateRoute from './components/PrivateRoute';
 import Loader from './components/Loader';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import ServerError from './pages/ServerError';
 
 function App() {
-  const { isAuthenticated } = useAuth();
-  // const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
 
-  // if(!isAuthenticated){
-  //   navigate("/login");
-  // }
-
-  const [loading, setLoading] = useState(true); // Loader state
-
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false); 
-    }, 2000); 
-  }, []);
+  console.log('isAuthenticated:', isAuthenticated);
+  console.log('loading:', loading);
 
   if (loading) {
     return <Loader />;
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Unprotected Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<LandingPage />} />
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/user" replace /> : <Login />}
+      />
+      <Route
+        path="/register"
+        element={
+          isAuthenticated ? <Navigate to="/user" replace /> : <Register />
+        }
+      />
+      <Route path="/server-failed" element={<ServerError />} />
 
-        {/* Protected Routes */}
-        {!isAuthenticated ? (
-          <Route path="/" element={<LandingPage />} />
-        ) : (
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <HomePage />
-              </PrivateRoute>
-            }
-          >
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="friend-request" element={<FriendRequest />} />
-            <Route path="newfriend" element={<FriendProfile />} />
-            <Route path="chat/:userId" element={<UserChat />} />
-          </Route>
-        )}
+      {/* Protected Routes - Now Each One is Inside PrivateRoute */}
+      <Route
+        path="/user/*"
+        element={
+          <PrivateRoute>
+            <HomePage />
+          </PrivateRoute>
+        }
+      >
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="friend-request" element={<FriendRequest />} />
+        <Route path="newfriend" element={<FriendProfile />} />
+        <Route path="chat/:userId" element={<UserChat />} />
+        <Route path="f/:userId" element={<FriendProfile />} />
+      </Route>
 
-        <Route path="*" element={<NoPage />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Catch-all for 404 */}
+      <Route path="*" element={<NoPage />} />
+    </Routes>
   );
 }
 

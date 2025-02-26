@@ -69,7 +69,7 @@ function FriendList() {
         {friends.map((friend) => (
           <NavLink
             key={friend.friendId}
-            to={`/chat/${friend.friendId}`}
+            to={`/user/chat/${friend.friendId}`}
             onClick={() => handleClick(friend.friendId)}
             className={({ isActive }) =>
               `rounded-md ${

@@ -49,7 +49,7 @@ function HamMenu() {
     >
       <div className="p-8 sm:p-10 w-full flex flex-col items-start justify-start gap-2 sm:gap-3 ">
         <NavLink
-          to="/profile"
+          to="/user/profile"
           className={({ isActive }) =>
             `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
               isActive
@@ -62,7 +62,7 @@ function HamMenu() {
           Profile
         </NavLink>
         <NavLink
-          to="/friend-request"
+          to="/user/friend-request"
           className={({ isActive }) =>
             `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
               isActive
@@ -75,7 +75,7 @@ function HamMenu() {
           Friend Request
         </NavLink>
         <NavLink
-          to="/settings"
+          to="/user/settings"
           className={({ isActive }) =>
             `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
               isActive
@@ -88,7 +88,7 @@ function HamMenu() {
           Settings
         </NavLink>
         <NavLink
-          to="/help"
+          to="/user/help"
           className={({ isActive }) =>
             `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
               isActive

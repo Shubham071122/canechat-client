@@ -43,97 +43,120 @@ function HamMenu() {
 
   return (
     <div
-      className={`h-full w-full relative bg-violet-600 dark:bg-slate-500 text-white dark:text-violet-100 transform transition-transform duration-[1200ms] ease-in-out ${
+      className={`h-full w-full relative bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transform transition-transform duration-300 ease-in-out shadow-2xl ${
         isOpenHam ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
-      <div className="p-8 sm:p-10 w-full flex flex-col items-start justify-start gap-2 sm:gap-3 ">
-        <NavLink
-          to="/user/profile"
-          className={({ isActive }) =>
-            `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-              isActive
-                ? 'bg-blue-400 dark:bg-blue-600'
-                : 'hover:bg-blue-300 dark:hover:bg-blue-500'
-            }`
-          }
-        >
-          <FaUser className="text-lg sm:text-xl" />
-          Profile
-        </NavLink>
-        <NavLink
-          to="/user/friend-request"
-          className={({ isActive }) =>
-            `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-              isActive
-                ? 'bg-blue-400 dark:bg-blue-600'
-                : 'hover:bg-blue-300 dark:hover:bg-blue-500'
-            }`
-          }
-        >
-          <FaUserPlus className="text-xl sm:text-2xl" />
-          Friend Request
-        </NavLink>
-        <NavLink
-          to="/user/settings"
-          className={({ isActive }) =>
-            `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-              isActive
-                ? 'bg-blue-400 dark:bg-blue-600'
-                : 'hover:bg-blue-300 dark:hover:bg-blue-500'
-            }`
-          }
-        >
-          <IoSettings className="text-xl sm:text-2xl" />
-          Settings
-        </NavLink>
-        <NavLink
-          to="/user/help"
-          className={({ isActive }) =>
-            `w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out ${
-              isActive
-                ? 'bg-blue-400 dark:bg-blue-600'
-                : 'hover:bg-blue-300 dark:hover:bg-blue-500'
-            }`
-          }
-        >
-          <IoHelpCircle className="text-xl sm:text-2xl" />
-          Help
-        </NavLink>
-        <div className="w-full flex items-center justify-between">
-          <p className='w-full text-base sm:text-lg flex items-center p-3'>Theme</p>
-          <div>
-          <label className="relative inline-block w-10 h-6 sm:w-14 sm:h-8 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={toggleDarkMode}
-              className="opacity-0 w-0 h-0"
-            />
-            <span className="absolute inset-0 bg-gray-200 dark:bg-gray-600 rounded-full transition-colors"></span>
-            <span
-              className={`absolute left-1 top-1 w-4 h-4 sm:w-6 sm:h-6 bg-white rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out transform ${
-                darkMode ? 'translate-x-4 sm:translate-x-6' : ''
-              }`}
-            >
-              {darkMode ? (
-                <FaSun className="text-yellow-500 w-3 h-3 sm:w-5 sm:h-5" />
-              ) : (
-                <FaMoon className="text-gray-900 dark:text-gray-100 w-3 h-3 sm:w-5 sm:h-5" />
-              )}
-            </span>
-          </label>
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Menu</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Can-e-Chat</p>
         </div>
-        </div>
-        <button
-          className="w-full mb-2 text-base sm:text-lg flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ease-in-out hover:bg-blue-300 dark:hover:bg-blue-500"
-          onClick={handleLogout}
-        >
-          <BiLogOut className="text-xl sm:text-2xl" />
-          Logout
-        </button>
 
-        <p className='text-xs text-center absolute bottom-36 left-32'>Copyright © 2024</p>
+        {/* Menu Items */}
+        <div className="flex-1 p-4 space-y-2">
+          <NavLink
+            to="/user/profile"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-4 p-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+              }`
+            }
+          >
+            <FaUser className="text-lg" />
+            <span>Profile</span>
+          </NavLink>
+          
+          <NavLink
+            to="/user/friend-request"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-4 p-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+              }`
+            }
+          >
+            <FaUserPlus className="text-lg" />
+            <span>Friend Requests</span>
+          </NavLink>
+          
+          <NavLink
+            to="/user/settings"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-4 p-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+              }`
+            }
+          >
+            <IoSettings className="text-lg" />
+            <span>Settings</span>
+          </NavLink>
+          
+          <NavLink
+            to="/user/help"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-4 p-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+              }`
+            }
+          >
+            <IoHelpCircle className="text-lg" />
+            <span>Help & Support</span>
+          </NavLink>
+
+          {/* Theme Toggle */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+              <div className="flex items-center gap-4">
+                {darkMode ? <FaMoon className="text-lg" /> : <FaSun className="text-lg" />}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {darkMode ? 'Dark Mode' : 'Light Mode'}
+                </span>
+              </div>
+              <label className="relative inline-block w-12 h-6 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={darkMode}
+                  onChange={toggleDarkMode}
+                  className="opacity-0 w-0 h-0"
+                />
+                <span className={`absolute inset-0 rounded-full transition-colors duration-300 ${
+                  darkMode ? 'bg-blue-500' : 'bg-gray-300'
+                }`}></span>
+                <span
+                  className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out transform ${
+                    darkMode ? 'translate-x-6' : ''
+                  }`}
+                ></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <button
+            className="w-full flex items-center gap-4 p-3 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
+            onClick={handleLogout}
+          >
+            <BiLogOut className="text-lg" />
+            <span>Logout</span>
+          </button>
+          
+          <div className="text-center pt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              © 2024 Can-e-Chat
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
           withCredentials: true,
         },
       );
-
+console.log("LOGIN RES:",response);
       if (response.data.statusCode == 200) {
         setIsAuthenticated(true);
         setUserData(response.data.data.user);
@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
         `${import.meta.env.VITE_SERVER_URL}/users/register`,
         data,
       );
+      console.log("res:",response);
       if (response.data.statusCode === 200) {
         setIsAuthenticated(true);
         setUserData(response.data.data.user);

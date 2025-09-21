@@ -26,11 +26,42 @@ function Login() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setLoginData({ ...loginData, [name]: value });
+    
+    if (errors[name]) {
+      const newErrors = { ...errors };
+      
+      if (name === 'userData') {
+        if (value.includes('@') && value.length > 0) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(value)) {
+            delete newErrors.userData;
+          } else {
+            newErrors.userData = 'Please enter a valid email address!';
+          }
+        } else if (!value.includes('@') && value.length > 0) {
+          if (value.startsWith('@')) {
+            delete newErrors.userData;
+          } else {
+            newErrors.userData = 'Username must start with @!';
+          }
+        } else if (value.length === 0) {
+          delete newErrors.userData;
+        }
+      }
+      
+      setErrors(newErrors);
+    }
   };
 
   const handlePasswordChange = (e) => {
     const { value } = e.target;
     setLoginData({ ...loginData, password: value });
+    
+    if (errors.password && value.length > 0) {
+      const newErrors = { ...errors };
+      delete newErrors.password;
+      setErrors(newErrors);
+    }
   };
 
   const validateForm = () => {
@@ -39,7 +70,9 @@ function Login() {
     const { userData, password } = loginData;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
-    if (userData.includes('@')) {
+    if (!userData.trim()) {
+      newErrors.userData = 'Email or username is required!';
+    } else if (userData.includes('@')) {
       if (!emailRegex.test(userData)) {
         newErrors.userData = 'Please enter a valid email address!';
       }
@@ -49,7 +82,7 @@ function Login() {
       }
     }
   
-    if (!password) {
+    if (!password.trim()) {
       newErrors.password = 'Password is required!';
     }
   
@@ -97,83 +130,138 @@ function Login() {
   };
 
   return (
-    <section className="relative w-full h-screen min-h-screen">
-      <Navbar />
-      <section className="w-full px-4 sm:px-0 flex items-center justify-center text-black h-full bg-blue-300 dark:bg-slate-600">
-        <div className="border-2 w-full sm:w-4/12 py-10 px-8 sm:px-12 rounded-3xl shadow-2xl bg-white dark:bg-slate-800">
-          <div className="w-full flex flex-col items-center">
-            <img src={Logo} alt="logo" className="w-20 h-20" />
-            <h2 className="text-gray-600 dark:text-gray-50 font-semibold text-2xl mt-3">
-              Welcome Back Buddy!
-            </h2>
+    <section className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+            <img src={Logo} alt="Can-e-Chat Logo" className="w-10 h-10" />
           </div>
-          <div className="my-7">
-            <input
-              type="text"
-              placeholder="Email or username"
-              name="userData"
-              value={loginData.userData}
-              onChange={handleInputChange}
-              className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
-            />
-            {errors.userData && (
-              <p className="text-red-500 text-sm">{errors.userData}</p>
-            )}
-            <div className="mt-4 relative">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h1>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to continue to Can-e-Chat</p>
+        </div>
+
+        {/* Login Form */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+            {/* Email/Username Input */}
+            <div className="space-y-2">
+              <label htmlFor="userData" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email or Username
+              </label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                name="password"
-                value={loginData.password}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-4 rounded-xl outline-blue-900 text-black dark:text-gray-100 bg-violet-100 dark:bg-gray-600 text-xl"
+                id="userData"
+                type="text"
+                name="userData"
+                placeholder="Enter your email or @username"
+                value={loginData.userData}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.userData 
+                    ? 'border-red-300 dark:border-red-600' 
+                    : 'border-gray-200 dark:border-gray-600'
+                }`}
+                noValidate
               />
-              {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password}</p>
+              {errors.userData && (
+                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                  <span className="text-xs">⚠</span> {errors.userData}
+                </p>
               )}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[17px] text-gray-400 text-lg"
-              >
-                {showPassword ? (
-                  <BsFillEyeSlashFill className="text-2xl" />
-                ) : (
-                  <BsFillEyeFill className="text-2xl" />
-                )}
-              </button>
             </div>
-            <Link
-              to="/forget-password"
-              className=" text-blue-400 font-thin ml-1"
+
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="Enter your password"
+                  value={loginData.password}
+                  onChange={handlePasswordChange}
+                  className={`w-full px-4 py-3 pr-12 rounded-xl border transition-all duration-200 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.password 
+                      ? 'border-red-300 dark:border-red-600' 
+                      : 'border-gray-200 dark:border-gray-600'
+                  }`}
+                  noValidate
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  {showPassword ? (
+                    <BsFillEyeSlashFill className="text-xl" />
+                  ) : (
+                    <BsFillEyeFill className="text-xl" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                  <span className="text-xs">⚠</span> {errors.password}
+                </p>
+              )}
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <Link
+                to="/forget-password"
+                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:hover:shadow-lg flex items-center justify-center gap-2"
             >
-              Forget Password?
-            </Link>
+              {loading ? (
+                <>
+                  <LiaSpinnerSolid className="animate-spin text-xl" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <span>Sign In</span>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+            <span className="px-4 text-sm text-gray-500 dark:text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
           </div>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full flex flex-row justify-center items-center bg-blue-700 text-white font-medium text-2xl py-3 rounded-xl hover:transition-all 300ms ease-in-out hover:bg-blue-600"
-          >
-            {loading ? (
-              <LiaSpinnerSolid className="animate-spin text-3xl" />
-            ) : (
-              'SignIn'
-            )}
-          </button>
-          <div className="w-full flex flex-row justify-center items-center my-5">
-            <div className="w-full h-[0.5px] bg-gray-400"></div>
-            <p className="mx-2 text-gray-400 text-sm font-thin">OR</p>
-            <div className="w-full h-[0.5px] bg-gray-400"></div>
-          </div>
-          <p className="w-full flex flex-row justify-center text-sm text-gray-500">
+
+          {/* Sign Up Link */}
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 ml-1">
-              Sign Up
+            <Link
+              to="/register"
+              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              Create account
             </Link>
           </p>
         </div>
-      </section>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            © 2024 Can-e-Chat. All rights reserved.
+          </p>
+        </div>
+      </div>
     </section>
   );
 }

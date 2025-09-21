@@ -63,17 +63,17 @@ function MessageInput({onSendMessage}) {
   }, []);
 
   return (
-    <div className="flex items-center p-2 px-3 bg-violet-400 dark:bg-slate-700 rounded-3xl">
+    <div className="flex items-end space-x-3 bg-white dark:bg-gray-800">
       {/* Emoji Picker */}
-      <div className="relative" ref={emojiPickerRef}>
+      <div className="relative flex-shrink-0" ref={emojiPickerRef}>
         <button
-          className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 pt-1"
+          className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
         >
           <BsEmojiLaughing className='text-xl'/>
         </button>
         {showEmojiPicker && (
-          <div className="absolute bottom-12 -left-2">
+          <div className="absolute bottom-12 left-0 z-50">
             <EmojiPicker 
               onEmojiClick={onEmojiClick} 
               theme={isDarkMode ? 'dark' : 'light'}
@@ -85,24 +85,30 @@ function MessageInput({onSendMessage}) {
         )}
       </div>
 
-      {/* Auto-Resizing Textarea */}
-      <TextareaAutosize
-        className="flex-1 mx-2 px-3 py-2 rounded-md focus:outline-none dark:bg-slate-600 dark:text-gray-100"
-        placeholder="Type a message..."
-        value={message}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        minRows={1}
-        maxRows={5} 
-        style={{ resize: 'none' }} 
-      />
+      {/* Message Input Container */}
+      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+        <TextareaAutosize
+          className="w-full px-4 py-3 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none"
+          placeholder="Type a message..."
+          value={message}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          minRows={1}
+          maxRows={4}
+        />
+      </div>
 
       {/* Send Button */}
       <button
-        className="px-3 py-3 text-gray-50 dark:text-gray-50 hover:bg-blue-400 rounded-full transition-colors 200ms ease-in-out"
+        className={`p-3 rounded-full transition-all duration-200 flex-shrink-0 ${
+          message.trim() 
+            ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+        }`}
         onClick={handleSendMessage}
+        disabled={!message.trim()}
       >
-        <BsSendFill className='text-2xl'/>
+        <BsSendFill className='text-lg'/>
       </button>
     </div>
   );

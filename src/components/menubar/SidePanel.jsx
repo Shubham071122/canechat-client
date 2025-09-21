@@ -30,16 +30,15 @@ function SidePanel() {
   return (
     <div
       ref={panelRef}
-      className="w-0 sm:w-4/12 h-full bg-gray-100 dark:bg-slate-700 transition-colors relative overflow-hidden"
+      className="w-0 sm:w-4/12 h-full bg-white dark:bg-gray-800 transition-colors relative overflow-hidden border-r border-gray-200 dark:border-gray-700 flex flex-col"
     >
       <Topbar />
-      <div className="relative h-full">
+      <div className="relative flex-1 overflow-hidden">
         {/* HamMenu sliding in from the left */}
         <div
-          className={`absolute inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-10 ${
+          className={`absolute inset-0 transform transition-transform duration-300 ease-in-out z-10 bg-white dark:bg-gray-800 ${
             isOpenHam ? 'translate-x-0' : '-translate-x-full'
           }`}
-          style={{ width: '100%' }}
         >
           <HamMenu />
         </div>
@@ -52,7 +51,6 @@ function SidePanel() {
               : 'opacity-100 pointer-events-auto'
           }`}
         >
-          {/* {searchResults?.length > 0 ? <SearchSuggestions /> : <FriendList />} */}
           <FriendList />
         </div>
       </div>

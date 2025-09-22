@@ -20,10 +20,15 @@ function UserChat() {
   const [showPopup, setShowPopup] = useState(false);
   const recipientId = useParams().userId;
   const { currentUserId, userData: currentUserData } = useAuth();
-  const { getUserDataById, userData } = useUser();
+  const { fetchUser, getUser, isUserLoading } = useUser();
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.messages.messages);
   const messageStatus = useSelector((state) => state.messages.status);
+
+  // Get user data for the recipient
+  const userData = getUser(recipientId);
+  const userLoading = isUserLoading(recipientId);
+
 
   // Connect to Socket.IO
   useEffect(() => {
@@ -38,7 +43,9 @@ function UserChat() {
 
   useEffect(() => {
     if (socket && recipientId && currentUserId) {
-      getUserDataById(recipientId);
+      // Fetch user data using the new context method
+      fetchUser(recipientId);
+      
       dispatch(
         fetchMessages({ userId: currentUserId, recipientId: recipientId }),
       );
@@ -54,7 +61,7 @@ function UserChat() {
         socket.off('receiveMessage');
       };
     }
-  }, [currentUserId, recipientId, dispatch, useParams]);
+  }, [currentUserId, recipientId, dispatch, fetchUser, socket]);
 
 
   const handleSendMessage = (newMessage) => {
@@ -83,7 +90,7 @@ function UserChat() {
     // dispatch(deleteMessage({ messageId }));
   };
 
-  if (!userData || !recipientId || !currentUserId) {
+  if (!userData || !recipientId || !currentUserId || userLoading) {
     return (
       <div className="flex flex-col h-full bg-white dark:bg-gray-900">
         {/* Loading Header Skeleton */}
@@ -205,9 +212,6 @@ function UserChat() {
   }
 
 
-  console.log("Rendering chat with user:", userData);
-  console.log("Current user data:", currentUserData);
-
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Header */}
@@ -261,10 +265,20 @@ function UserChat() {
         />
       </div>
 
-      {/* Input Area - Sticky Bottom */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 mt-2">
-        <MessageInput onSendMessage={handleSendMessage} />
-      </div>
+      {/* Input Area - Conditional based on block status */}
+      {userData.isBlocked ? (
+        <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 mt-2">
+          <div className="flex items-center justify-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You blocked this contact
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 mt-2">
+          <MessageInput onSendMessage={handleSendMessage} />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { FaUser, FaUserMinus, FaBan, FaTimes } from "react-icons/fa";
+import { FaUser, FaUserMinus, FaBan, FaUnlock } from "react-icons/fa";
 import { useUser } from "../../context/UserContext";
 import { useNavigate, useParams } from "react-router-dom";
 
 const PopupMenu = ({ userData, onClose }) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
-  const { unfriendUser, blockUser } = useUser();
+  const [showUnblockModal, setShowUnblockModal] = useState(false);
+  const { unfriendUser, blockUser, unblockUser } = useUser();
   const { userId } = useParams();
-  // const router = useNavigate();
+  const router = useNavigate();
 
   const popupMenuRef = useRef(null);
 
@@ -85,6 +86,42 @@ const PopupMenu = ({ userData, onClose }) => {
     </div>
   );
 
+  const UnblockUserModal = () => (
+    <div className="fixed inset-0 flex justify-center items-center bg-black/50 dark:bg-black/70 z-[100] backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-11/12 sm:w-96 border border-gray-200 dark:border-gray-700">
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 dark:bg-green-900/20">
+            <FaUnlock className="text-2xl text-green-500" />
+          </div>
+
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Unblock User?
+          </h3>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            This user will be able to send you messages again and you'll be able
+            to see their messages.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              onClick={handleCancelUnblock}
+            >
+              Cancel
+            </button>
+            <button
+              className="flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors bg-green-500 hover:bg-green-600"
+              onClick={handleConfirmUnblock}
+            >
+              Unblock
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const handleRemoveFriend = () => {
     setShowRemoveModal(true);
   };
@@ -93,9 +130,12 @@ const PopupMenu = ({ userData, onClose }) => {
     setShowBlockModal(true);
   };
 
+  const handleUnblock = () => {
+    setShowUnblockModal(true);
+  };
+
   const handleViewProfile = () => {
-    // router.push(`/user/f/${userId}`);
-    toast.success("Opening profile...");
+    router(`/user/f/${userId}`);
     onClose();
   };
 
@@ -125,6 +165,19 @@ const PopupMenu = ({ userData, onClose }) => {
     }
   };
 
+  const handleConfirmUnblock = async () => {
+    if (!userData) return;
+
+    try {
+      await unblockUser(userData.userName, userId);
+    } catch (error) {
+      console.log("Error unblocking user:", error);
+    } finally {
+      setShowUnblockModal(false);
+      onClose();
+    }
+  };
+
   const handleCancelRemove = () => {
     setShowRemoveModal(false);
     onClose();
@@ -135,9 +188,14 @@ const PopupMenu = ({ userData, onClose }) => {
     onClose();
   };
 
+  const handleCancelUnblock = () => {
+    setShowUnblockModal(false);
+    onClose();
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (showRemoveModal || showBlockModal) return;
+      if (showRemoveModal || showBlockModal || showUnblockModal) return;
 
       if (popupMenuRef.current && !popupMenuRef.current.contains(e.target)) {
         onClose();
@@ -149,7 +207,7 @@ const PopupMenu = ({ userData, onClose }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose, showRemoveModal, showBlockModal]);
+  }, [onClose, showRemoveModal, showBlockModal, showUnblockModal]);
 
   const menuItems = [
     {
@@ -164,7 +222,13 @@ const PopupMenu = ({ userData, onClose }) => {
       onClick: handleRemoveFriend,
       className: "hover:bg-orange-50 dark:hover:bg-orange-900/20",
     },
-    {
+    // Conditionally show Block or Unblock based on user's block status
+    userData?.isBlocked ? {
+      icon: <FaUnlock className="text-green-500" />,
+      label: "Unblock User",
+      onClick: handleUnblock,
+      className: "hover:bg-green-50 dark:hover:bg-green-900/20",
+    } : {
       icon: <FaBan className="text-red-500" />,
       label: "Block User",
       onClick: handleBlock,
@@ -198,6 +262,7 @@ const PopupMenu = ({ userData, onClose }) => {
       {/* Confirmation Modals */}
       {showRemoveModal && <RemoveFriendModal />}
       {showBlockModal && <BlockUserModal />}
+      {showUnblockModal && <UnblockUserModal />}
     </>
   );
 };

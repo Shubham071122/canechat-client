@@ -140,7 +140,7 @@ export const UserProvider = ({ children }) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/friend/block-user`,
-        { userToBlock: userName },
+        { friendUserName: userName },
         { withCredentials: true }
       );
 
@@ -154,6 +154,29 @@ export const UserProvider = ({ children }) => {
     } catch (error) {
       console.error("Error blocking user:", error);
       toast.error("Failed to block user.");
+      throw error;
+    }
+  }, [fetchUser]);
+
+  // Unblock user
+  const unblockUser = useCallback(async (userName, userId) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/friend/unblock-user`,
+        { friendUserName: userName },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        toast.success("User unblocked.");
+        
+        // Update user data to reflect new status
+        await fetchUser(userId, true);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      toast.error("Failed to unblock user.");
       throw error;
     }
   }, [fetchUser]);
@@ -190,6 +213,7 @@ export const UserProvider = ({ children }) => {
     rejectFriendRequest,
     unfriendUser,
     blockUser,
+    unblockUser,
     
     // Data
     users,

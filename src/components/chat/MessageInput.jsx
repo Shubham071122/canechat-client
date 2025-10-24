@@ -4,32 +4,82 @@ import { BsSendFill, BsEmojiLaughing } from 'react-icons/bs';
 import TextareaAutosize from 'react-textarea-autosize'; 
 import toast from 'react-hot-toast';
 
-function MessageInput({onSendMessage}) {
+function MessageInput({onSendMessage, socket, currentUserId, recipientId}) {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const isDarkMode = document.documentElement.classList.contains('dark');
   
   const emojiPickerRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   // Handle adding emoji to the message
   const onEmojiClick = (emojiData) => {
     if (emojiData && emojiData.emoji) {
       setMessage((prevMessage) => prevMessage + emojiData.emoji);
     } else {
-      toast.error("Emoji selection failed!");
       console.error("Emoji selection failed");
+    }
+  };
+
+  // Handle typing events
+  const handleTypingStart = () => {
+    if (socket && currentUserId && recipientId && !isTyping) {
+      setIsTyping(true);
+      socket.emit('typing', {
+        recipient: recipientId,
+        isTyping: true
+      });
+      console.log("🔤 Started typing to:", recipientId);
+    }
+  };
+
+  const handleTypingStop = () => {
+    if (socket && currentUserId && recipientId && isTyping) {
+      setIsTyping(false);
+      socket.emit('typing', {
+        recipient: recipientId,
+        isTyping: false
+      });
+      console.log("⏹️ Stopped typing to:", recipientId);
     }
   };
 
   // Handle message input change
   const handleInputChange = (e) => {
     setMessage(e.target.value);
+    
+    // Handle typing indicators
+    if (e.target.value.trim()) {
+      handleTypingStart();
+      
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // Set new timeout to stop typing after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        handleTypingStop();
+      }, 2000);
+    } else {
+      // If message is empty, stop typing immediately
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      handleTypingStop();
+    }
   };
 
   // Handle sending the message
   const handleSendMessage = () => {
     if (message.trim()) {
-      console.log('Message sent:', message);
+      // Stop typing when sending message
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      handleTypingStop();
+      
       onSendMessage(message);
       setMessage(''); 
     }
@@ -62,6 +112,37 @@ function MessageInput({onSendMessage}) {
     };
   }, []);
 
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      // Stop typing when component unmounts
+      if (isTyping && socket && currentUserId && recipientId) {
+        socket.emit('typing', {
+          recipient: recipientId,
+          isTyping: false
+        });
+      }
+    };
+  }, [isTyping, socket, currentUserId, recipientId]);
+
+  // Stop typing when user navigates away or recipient changes
+  useEffect(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    if (isTyping && socket && currentUserId && recipientId) {
+      socket.emit('typing', {
+        recipient: recipientId,
+        isTyping: false
+      });
+      setIsTyping(false);
+    }
+    setMessage('');
+  }, [recipientId]);
+
   return (
     <div className="flex items-end space-x-3 bg-white dark:bg-gray-800">
       {/* Emoji Picker */}
@@ -86,9 +167,9 @@ function MessageInput({onSendMessage}) {
       </div>
 
       {/* Message Input Container */}
-      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+      <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
         <TextareaAutosize
-          className="w-full px-4 py-3 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none"
+          className="w-full px-4 py-2 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none"
           placeholder="Type a message..."
           value={message}
           onChange={handleInputChange}

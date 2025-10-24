@@ -65,13 +65,13 @@ const Messages = ({ messages, currentUser, onSendMessage }) => {
         return (
           <div key={msg._id || msg.messageId} className={`flex items-end space-x-2 ${isMyMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
 
-            {!isMyMessage && (
+            {/* {!isMyMessage && (
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-sm font-semibold">
                   {(msg.senderUserName || 'U')[1]?.toUpperCase() || 'U'}
                 </span>
               </div>
-            )}
+            )} */}
             
             {/* Message bubble */}
             <div className={`group max-w-xs lg:max-w-md ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}>

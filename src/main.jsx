@@ -9,20 +9,24 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { SearchProvider } from './context/SearchContext.jsx';
 import { UserProvider } from './context/UserContext.jsx';
 import { BrowserRouter } from 'react-router-dom';
+import { SocketProvider } from './context/SocketContext.jsx';
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <Provider store={store}>
+      <Provider store={store}>
+        <AuthProvider>
           <SearchProvider>
             <UserProvider>
-              <App />
-              <Toaster />
+              <SocketProvider>
+                <App />
+                <Toaster />
+              </SocketProvider>
             </UserProvider>
           </SearchProvider>
-        </Provider>
-      </AuthProvider>
+        </AuthProvider>
+      </Provider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

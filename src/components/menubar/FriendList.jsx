@@ -7,7 +7,7 @@ import { useUser } from '../../context/UserContext';
 import { useSearch } from '../../context/SearchContext';
 import SearchSuggestions from './SearchSuggestions';
 import { fetchMessages } from '../redux/slice/messageSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../../context/AuthContext';
 
 function FriendList() {
@@ -17,6 +17,7 @@ function FriendList() {
   const { searchResults } = useSearch();
   const dispatch = useDispatch();
   const {currentUserId} = useAuth();
+  const onlineUsers = useSelector((state) => state.messages.onlineUsers);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -107,8 +108,10 @@ function FriendList() {
                     alt={friend.fullName}
                     className="w-12 h-12 rounded-full object-cover"
                   />
-                  {/* Online indicator - you can add logic to show actual online status */}
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white dark:ring-gray-800"></div>
+                  {/* Online indicator - only show if user is actually online */}
+                  {onlineUsers.includes(friend.friendId) && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white dark:ring-gray-800"></div>
+                  )}
                 </div>
 
                 {/* Content */}

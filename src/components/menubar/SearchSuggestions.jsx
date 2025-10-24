@@ -61,7 +61,7 @@ function SearchSuggestions() {
               </div>
               
               {/* Online indicator */}
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+              {/* <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div> */}
             </div>
 
             {/* User Info */}

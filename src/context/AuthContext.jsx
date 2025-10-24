@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/users/check-auth`,
-          { withCredentials: true },
+          { withCredentials: true }
         );
         if (response.status == 200) {
           setIsAuthenticated(true);
@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         setIsAuthenticated(false);
-        console.error('Auth failed:', error);
-      }finally{
+        console.error("Auth failed:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
         loginData,
         {
           withCredentials: true,
-        },
+        }
       );
-console.log("LOGIN RES:",response);
+      console.log("LOGIN RES:", response);
       if (response.data.statusCode == 200) {
         setIsAuthenticated(true);
         setUserData(response.data.data.user);
@@ -52,7 +52,7 @@ console.log("LOGIN RES:",response);
       }
       return response.data;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       setIsAuthenticated(false);
     }
   };
@@ -61,16 +61,16 @@ console.log("LOGIN RES:",response);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/users/register`,
-        data,
+        data
       );
-      console.log("res:",response);
+      console.log("res:", response);
       if (response.data.statusCode === 200) {
         setIsAuthenticated(true);
         setUserData(response.data.data.user);
       }
       return response.data;
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
       setIsAuthenticated(false);
     }
   };
@@ -80,16 +80,16 @@ console.log("LOGIN RES:",response);
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/users/logout`,
         {},
-        { withCredentials: true },
+        { withCredentials: true }
       );
       if (response.status === 200) {
         setIsAuthenticated(false);
         setUserData(null);
-        navigate("/login")
+        navigate("/login");
       }
       return response.status;
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
